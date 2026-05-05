@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imposteurs !</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141418;
+    --surface2: #1c1c22;
+    --border: #2a2a35;
+    --accent: #c8a96e;
+    --accent2: #e8c98e;
+    --danger: #c0392b;
+    --danger2: #e74c3c;
+    --citizen: #2ecc71;
+    --undercover: #9b59b6;
+    --mrwhite: #3498db;
+    --text: #e8e6e0;
+    --muted: #888880;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(200,169,110,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(155,89,182,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* ─── Typography ─── */
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 8vw, 4rem);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(200,169,110,0.3);
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  h3 {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  p { line-height: 1.6; color: var(--muted); font-size: 0.9rem; }
+
+  /* ─── Screens ─── */
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-accent {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(200,169,110,0.05) 100%);
+  }
+
+  /* ─── Buttons ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    width: 100%;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    width: 100%;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+  .btn-danger:hover { background: var(--danger2); }
+
+  .btn-sm {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ─── Inputs ─── */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--accent); }
+
+  /* ─── Range input ─── */
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .range-val {
+    min-width: 28px;
+    text-align: right;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ─── Players list ─── */
+  .players-list { list-style: none; }
+  .players-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .player-name { font-size: 0.9rem; }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .remove-btn:hover { color: var(--danger2); }
+
+  /* ─── Secret word reveal ─── */
+  .reveal-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .player-reveal-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .word-box {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    text-align: center;
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .word-box.revealed {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--surface2), rgba(200,169,110,0.08));
+  }
+
+  .word-hidden {
+    font-size: 2rem;
+    letter-spacing: 0.5em;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+  }
+  .word-hidden:hover { color: var(--accent); }
+
+  .secret-word {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 12px;
+  }
+
+  .badge-citizen { background: rgba(46,204,113,0.15); color: var(--citizen); border: 1px solid rgba(46,204,113,0.3); }
+  .badge-undercover { background: rgba(155,89,182,0.15); color: var(--undercover); border: 1px solid rgba(155,89,182,0.3); }
+  .badge-mrwhite { background: rgba(52,152,219,0.15); color: var(--mrwhite); border: 1px solid rgba(52,152,219,0.3); }
+
+  .tap-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ─── Turn order ─── */
+  .turn-list { list-style: none; counter-reset: turns; }
+  .turn-list li {
+    counter-increment: turns;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .turn-list li:last-child { border-bottom: none; }
+  .turn-list li::before {
+    content: counter(turns);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* ─── Vote section ─── */
+  .vote-list { list-style: none; }
+  .vote-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .vote-item.has-votes { border-color: rgba(200,169,110,0.4); }
+
+  .vote-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .vote-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .vote-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .vote-btn.plus:hover:not(:disabled) { background: rgba(200,169,110,0.1); }
+  .vote-btn.minus:hover:not(:disabled) { background: rgba(192,57,43,0.1); border-color: var(--danger2); color: var(--danger2); }
+
+  .vote-name {
+    flex: 1;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .vote-count {
+    min-width: 28px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .vote-count.has-votes { color: var(--accent); }
+
+  @keyframes halo-rotate {
+    0%   { --halo-angle: 0deg; }
+    100% { --halo-angle: 360deg; }
+  }
+  @property --halo-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  .btn-glow {
+    background: #2ecc71 !important;
+    color: #0d0d0f !important;
+    position: relative;
+    z-index: 0;
+    animation: halo-rotate 2s linear infinite;
+  }
+  .btn-glow::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 10px;
+    background: conic-gradient(
+      from var(--halo-angle),
+      #ff4e50, #fc913a, #f9d423, #2ecc71, #1abc9c,
+      #3498db, #9b59b6, #e91e8c, #ff4e50
+    );
+    z-index: -1;
+    filter: blur(4px);
+  }
+  .btn-glow::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 10px;
+    background: conic-gradient(
+      from var(--halo-angle),
+      #ff4e50, #fc913a, #f9d423, #2ecc71, #1abc9c,
+      #3498db, #9b59b6, #e91e8c, #ff4e50
+    );
+    z-index: -2;
+  }
+
+  /* ─── Result section ─── */
+  .result-header {
+    text-align: center;
+    padding: 32px 0;
+  }
+
+  .result-icon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 16px;
+    animation: pulse 1s ease;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .eliminated-reveal {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+  }
+
+  .role-reveal-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+
+  /* ─── Stats / Scores ─── */
+  .stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-val { color: var(--accent); font-weight: 500; }
+
+  /* ─── Header ─── */
+  .app-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-top: 8px;
+  }
+  .subtitle {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  /* ─── Tabs / Step indicator ─── */
+  .steps {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+  .step {
+    height: 3px;
+    flex: 1;
+    background: var(--border);
+    border-radius: 3px;
+    transition: background 0.3s;
+  }
+  .step.done { background: var(--accent); }
+  .step.active { background: var(--accent2); }
+
+  /* ─── Toggle ─── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+  }
+  .toggle-label { font-size: 0.85rem; }
+  .toggle-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  /* ─── MrWhite guess ─── */
+  .mrwhite-prompt {
+    background: rgba(52,152,219,0.08);
+    border: 1px solid rgba(52,152,219,0.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+  }
+
+  /* ─── Scores table ─── */
+  .score-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .score-item:last-child { border-bottom: none; }
+  .score-pts {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  /* ─── Misc ─── */
+  .mt8 { margin-top: 8px; }
+  .mt16 { margin-top: 16px; }
+  .mt24 { margin-top: 24px; }
+  .gap8 { display: flex; flex-direction: column; gap: 8px; }
+  .text-center { text-align: center; }
+  .text-accent { color: var(--accent); }
+  .inline-row { display: flex; gap: 10px; }
+
+  .notification {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    transition: transform 0.3s;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .notification.show { transform: translateX(-50%) translateY(0); }
+
+  .word-pairs-info {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .current-player-banner {
+    background: linear-gradient(135deg, rgba(200,169,110,0.1), rgba(200,169,110,0.05));
+    border: 1px solid rgba(200,169,110,0.3);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .current-player-banner .name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--accent);
+  }
+  .current-player-banner .desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════════════════════════════ SCREEN: HOME ══════════════════════════════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="app-header">
+      <div>
+        <h1 style="white-space:nowrap;background:linear-gradient(90deg,#ff4e50,#fc913a,#f9d423,#2ecc71,#1abc9c,#3498db,#9b59b6,#e91e8c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Imposteurs&nbsp;!</h1>
+        <div class="subtitle">Jeu de déduction sociale</div>
+      </div>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Comment jouer</h3>
+      <div class="mt8 gap8">
+        <p>🎭 Chaque joueur reçoit un mot secret. La majorité partage le même mot (citoyens). Un ou deux joueurs ont un mot <em>proche mais différent</em> (agent secret). Parfois, un joueur ne reçoit <em>aucun mot</em> (homme invisible).</p>
+        <p>💬 À chaque tour, chacun donne un indice d'un mot. Puis on vote pour éliminer un suspect.</p>
+        <p>🏆 Les citoyens gagnent en éliminant tous les imposteurs. Les agents secrets gagnent s'ils survivent en minorité. L'homme invisible gagne s'il est éliminé mais devine le mot des citoyens.</p>
+      </div>
+    </div>
+
+    <div class="mt16 gap8">
+      <button class="btn btn-primary" onclick="enterFullscreen();showScreen('screen-setup')">Nouvelle partie</button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-scores')">Scores</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: SETUP ══════════════════════════════════ -->
+  <div class="screen" id="screen-setup">
+    <div class="steps">
+      <div class="step done" id="step1"></div>
+      <div class="step active" id="step2"></div>
+      <div class="step" id="step3"></div>
+    </div>
+    <h2>Configuration</h2>
+    <p class="mt8">Paramétrez la partie.</p>
+
+    <div class="card mt24">
+      <h3>Joueurs</h3>
+      <div class="field mt16">
+        <div class="inline-row">
+          <input type="text" id="player-input" placeholder="Nom du joueur…" maxlength="20" onkeydown="if(event.key==='Enter')addPlayer()">
+          <button class="btn btn-primary btn-sm" style="width:auto;white-space:nowrap" onclick="addPlayer()">+ Ajouter</button>
+        </div>
+      </div>
+      <ul class="players-list" id="players-list"></ul>
+    </div>
+
+    <div class="card">
+      <h3>Rôles</h3>
+
+      <div class="toggle-row mt16">
+        <div>
+          <div class="toggle-label">Agent secret</div>
+          <div class="toggle-desc">Joueur(s) avec un mot différent</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-undercover" checked onchange="updateRoleToggles()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div id="undercover-count-row">
+        <div class="field">
+          <label>Nombre d'agents secrets</label>
+          <div class="range-row">
+            <input type="range" id="undercover-count" min="1" max="3" value="1" oninput="document.getElementById('uc-val').textContent=this.value">
+            <span class="range-val" id="uc-val">1</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Homme invisible</div>
+          <div class="toggle-desc">Un joueur sans mot (risqué !)</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-mrwhite" onchange="updateRoleToggles()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Mots</h3>
+      <div class="toggle-row mt8">
+        <div>
+          <div class="toggle-label">Mots aléatoires</div>
+          <div class="toggle-desc">Piocher dans la liste intégrée</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-random-words" checked onchange="toggleWordMode()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div id="custom-words-section" style="display:none">
+        <div class="field mt16">
+          <label>Mot des citoyens</label>
+          <input type="text" id="citizen-word" placeholder="ex: chien">
+        </div>
+        <div class="field">
+          <label>Mot des agents secrets</label>
+          <input type="text" id="undercover-word" placeholder="ex: loup">
+        </div>
+      </div>
+
+      <div id="random-words-info" class="word-pairs-info mt8">
+        <span id="pairs-count"></span> paires de mots disponibles.
+      </div>
+    </div>
+
+    <div class="inline-row mt16">
+      <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Retour</button>
+      <button class="btn btn-primary" onclick="startGame()">Démarrer →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: REVEAL ══════════════════════════════════ -->
+  <div class="screen" id="screen-reveal">
+    <div class="steps">
+      <div class="step done"></div>
+      <div class="step done"></div>
+      <div class="step active"></div>
+    </div>
+
+    <div class="reveal-header">
+      <h3>Distribution des rôles</h3>
+      <div class="player-reveal-name mt8" id="reveal-player-name">—</div>
+      <p>Passe le téléphone à ce joueur sans montrer l'écran.</p>
+    </div>
+
+    <div class="word-box" id="word-box">
+      <div class="word-hidden" id="word-hidden" onclick="revealWord()">
+        ● ● ●
+        <div class="tap-hint" style="margin-top:8px">Appuie pour révéler ton mot</div>
+      </div>
+      <div id="word-revealed" style="display:none">
+        <div class="secret-word" id="secret-word-text">—</div>
+        <div id="role-badge-container"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="reveal-next-btn" onclick="nextReveal()" disabled>Joueur suivant →</button>
+    <p class="mt8 text-center" style="font-size:0.75rem;color:var(--muted)">
+      Joueur <span id="reveal-idx">1</span> / <span id="reveal-total">?</span>
+    </p>
+    <div class="mt16" style="text-align:center">
+      <button class="btn btn-secondary btn-sm" onclick="reportWordPair()" style="opacity:0.6;font-size:0.7rem">
+        ⚠️ Signaler cette paire de mots
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: PLAY ══════════════════════════════════ -->
+  <div class="screen" id="screen-play">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div>
+        <h3>Manche <span id="play-round">1</span></h3>
+        <h2 style="margin-top:4px">Tour de parole</h2>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:0.75rem;color:var(--muted)">Joueurs</div>
+        <div style="font-size:1.1rem;color:var(--accent)" id="play-alive-count">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Ordre de jeu</h3>
+      <ul class="turn-list mt16" id="turn-order-list"></ul>
+    </div>
+
+    <div class="card mt8">
+      <p>Chaque joueur donne <strong>un seul indice</strong> sur son mot, sans le dire directement. Soyez vagues mais pas trop !</p>
+    </div>
+
+    <button class="btn btn-primary mt16" onclick="showScreen('screen-vote')">Passer au vote →</button>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: VOTE ══════════════════════════════════ -->
+  <div class="screen" id="screen-vote">
+    <h2>Vote</h2>
+    <p class="mt8">Distribuez les votes à l'aide des boutons + et −.</p>
+
+    <div class="card mt24">
+      <h3>Votes : <span id="votes-cast">0</span> / <span id="votes-needed">0</span></h3>
+      <ul class="vote-list mt16" id="vote-list"></ul>
+    </div>
+
+    <div id="vote-tally" class="card mt8" style="display:none">
+      <h3>Résultat du vote</h3>
+      <div id="vote-tally-content" class="mt16"></div>
+    </div>
+
+    <button class="btn btn-primary mt16" id="confirm-vote-btn" onclick="confirmVote()">Valider →</button>
+    <button class="btn btn-secondary mt8" onclick="showScreen('screen-play')">← Retour</button>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: ELIMINATION ══════════════════════════════════ -->
+  <div class="screen" id="screen-elimination">
+    <div class="result-header">
+      <span class="result-icon" id="elim-icon">💀</span>
+      <h2 id="elim-title">Éliminé !</h2>
+    </div>
+
+    <div class="eliminated-reveal" id="elim-reveal">
+      <div class="role-reveal-name" id="elim-name">—</div>
+      <div id="elim-role-badge"></div>
+      <div id="elim-word" class="mt8" style="font-size:0.85rem;color:var(--muted)"></div>
+    </div>
+
+    <!-- Mr. White guess section -->
+    <div id="mrwhite-guess-section" style="display:none">
+      <div class="mrwhite-prompt">
+        <h3>L'homme invisible devine !</h3>
+        <p class="mt8">L'homme invisible a été éliminé. Il peut encore gagner en devinant le mot des citoyens.</p>
+        <div class="field mt16">
+          <label>Quel est le mot des citoyens ?</label>
+          <input type="text" id="mrwhite-guess-input" placeholder="Votre réponse…">
+        </div>
+        <button class="btn btn-primary mt8" onclick="judgeMrWhite()">Valider</button>
+      </div>
+    </div>
+
+    <div id="elim-continue-section" class="mt16">
+      <div id="game-status-msg" class="card" style="display:none;text-align:center">
+        <div id="game-status-text"></div>
+      </div>
+      <button class="btn btn-primary mt16" id="elim-continue-btn" onclick="continueAfterElim()">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: GAME OVER ══════════════════════════════════ -->
+  <div class="screen" id="screen-gameover">
+    <div class="result-header">
+      <span class="result-icon" id="go-icon">🏆</span>
+      <h2 id="go-title">Victoire !</h2>
+      <p id="go-subtitle" class="mt8"></p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Révélation des rôles</h3>
+      <div id="final-reveal-list" class="mt16"></div>
+    </div>
+
+    <div class="card mt16">
+      <h3>Mots de la partie</h3>
+      <div class="stat-row mt8">
+        <span>Citoyens</span>
+        <span class="stat-val" id="go-citizen-word">—</span>
+      </div>
+      <div class="stat-row" id="go-undercover-row">
+        <span>Agent secret</span>
+        <span class="stat-val" id="go-undercover-word">—</span>
+      </div>
+    </div>
+
+    <div class="inline-row mt24">
+      <button class="btn btn-secondary" onclick="showScreen('screen-home')">Accueil</button>
+      <button class="btn btn-primary" onclick="rematch()">Revanche →</button>
+    </div>
+
+    <div class="mt16" style="text-align:center">
+      <button class="btn btn-secondary btn-sm" onclick="reportWordPair()" style="opacity:0.6;font-size:0.7rem">
+        ⚠️ Signaler cette paire de mots
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: SCORES ══════════════════════════════════ -->
+  <div class="screen" id="screen-scores">
+    <h2>Classement</h2>
+    <p class="mt8">Victoires cumulées sur cet appareil.</p>
+
+    <div class="card mt24">
+      <div id="scores-list"></div>
+    </div>
+
+    <div class="inline-row mt16">
+      <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Retour</button>
+      <button class="btn btn-danger btn-sm" style="flex:0" onclick="clearScores()">Effacer</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<div class="notification" id="notification"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  WORD PAIRS DATABASE
+// ═══════════════════════════════════════════════════════════════
+const WORD_PAIRS = [
+  // Animaux domestiques & sauvages
+  ["chat","tigre"],["chien","loup"],["lion","panthère"],["éléphant","rhinocéros"],
+  ["dauphin","baleine"],["aigle","faucon"],["grenouille","crapaud"],["lapin","lièvre"],
+  ["cheval","âne"],["cochon","sanglier"],["mouton","chèvre"],["vache","bison"],
+  ["perroquet","corbeau"],["hibou","chouette"],["requin","dauphin"],["crabe","homard"],
+  ["serpent","lézard"],["crocodile","alligator"],["guépard","léopard"],["ours","gorille"],
+  ["moustique","mouche"],["abeille","guêpe"],["papillon","libellule"],["fourmi","termite"],
+  ["pingouin","manchot"],["poulpe","méduse"],["tortue","iguane"],
+  ["renard","loup"],["girafe","chameau"],["zèbre","cheval"],["hippopotame","rhinocéros"],["panda","koala"],
+  ["saumon","truite"],["canard","oie"],["poule","dindon"],["pigeon","tourterelle"],["moineau","mésange"],
+  ["escargot","limace"],["hérisson","hamster"],["araignée","scorpion"],["coccinelle","scarabée"],
+  ["grillon","sauterelle"],["bourdon","frelon"],["mouette","goéland"],["cigogne","héron"],
+  ["paon","faisan"],["thon","sardine"],["oursin","étoile de mer"],["coquille Saint-Jacques","moule"],
+  // Nourriture & boissons
+  ["café","thé"],["pizza","tarte flambée"],["burger","sandwich"],
+  ["crêpe","gaufre"],["croissant","brioche"],["baguette","pain de mie"],["fromage","yaourt"],
+  ["chocolat","caramel"],["glace","sorbet"],["fraise","framboise"],
+  ["pomme","poire"],["citron","orange"],["banane","mangue"],["carotte","navet"],
+  ["soupe","bouillon"],["sushi","maki"],["tacos","burrito"],
+  ["jus d'orange","limonade"],["eau","soda"],
+  ["lasagnes","ravioli"],["risotto","paella"],["couscous","tajine"],
+  ["fondue","raclette"],["quiche","pizza"],["tarte","gâteau"],["madeleine","biscuit"],
+  ["macaron","éclair"],["pain au chocolat","croissant"],["beignet","churros"],["flan","crème brûlée"],
+  ["camembert","brie"],["gruyère","mozzarella"],
+  ["jambon","chorizo"],["saucisson","salami"],
+  ["crevette","moule"],["saumon","thon"],
+  ["poivron","piment"],["courgette","aubergine"],["brocoli","chou-fleur"],["épinard","salade"],
+  ["noisette","amande"],["pistache","cacahuète"],["noix","châtaigne"],
+  ["miel","confiture"],["beurre","margarine"],["crème","lait"],
+  ["smoothie","milkshake"],["chocolat chaud","lait chaud"],
+  // Sports & loisirs
+  ["football","rugby"],["tennis","badminton"],["natation","plongeon"],["ski","snowboard"],
+  ["boxe","judo"],["vélo","course à pied"],["golf","pétanque"],["échecs","dames"],
+  ["randonnée","escalade"],["surf","skateboard"],["yoga","danse"],
+  ["basketball","handball"],["volleyball","beach-volley"],["hockey","patinage"],
+  ["karaté","taekwondo"],["aviron","canoë-kayak"],
+  ["luge","bobsleigh"],["équitation","cyclisme"],["plongée","natation"],
+  ["pêche","chasse"],["jardinage","cuisine"],["dessin","aquarelle"],["photographie","vidéo"],
+  ["jeu vidéo","jeu de société"],["puzzle","maquette"],
+  // Transports
+  ["avion","hélicoptère"],["train","métro"],["voiture","camion"],["vélo","moto"],
+  ["bateau","ferry"],["tram","bus"],["taxi","voiture"],["fusée","avion"],
+  ["scooter","trottinette"],["kayak","canoë"],["montgolfière","parachute"],
+  ["ambulance","camion de pompier"],["tracteur","voiture"],
+  // Technologie & informatique
+  ["téléphone","tablette"],["ordinateur","console"],["imprimante","scanner"],
+  ["robot","drone"],["satellite","fusée"],
+  ["mot de passe","code PIN"],["application","logiciel"],
+  ["clavier","souris"],["écran","projecteur"],["disque dur","clé USB"],
+  ["Wi-Fi","Bluetooth"],["GPS","boussole"],["caméra","webcam"],["microphone","haut-parleur"],
+  ["batterie","chargeur"],["câble","adaptateur"],["antenne","routeur"],
+  ["virus informatique","piratage"],["réalité virtuelle","réalité augmentée"],
+  ["intelligence artificielle","robot"],["jeu vidéo","application"],
+  // Culture & arts
+  ["livre","magazine"],["film","série"],["guitare","basse"],["piano","orgue"],
+  ["peinture","dessin"],["sculpture","poterie"],["théâtre","cinéma"],["ballet","danse"],
+  ["roman","bande dessinée"],["musée","galerie"],["concert","festival"],
+  ["violon","guitare"],["trompette","saxophone"],["flûte","clarinette"],
+  ["accordéon","harmonica"],["harpe","piano"],
+  ["comédie","tragédie"],["cirque","spectacle"],["marionnette","clown"],
+  ["polar","thriller"],["science-fiction","fantasy"],["biographie","autobiographie"],
+  ["bande dessinée","manga"],["conte","légende"],["encyclopédie","dictionnaire"],
+  ["documentaire","reportage"],["animation","dessin animé"],
+  // Métiers & professions
+  ["médecin","infirmier"],["pompier","policier"],["boulanger","pâtissier"],["dentiste","médecin"],
+  ["architecte","ingénieur"],["avocat","juge"],["journaliste","présentateur"],["professeur","formateur"],
+  ["cuisinier","boulanger"],["acteur","réalisateur"],["musicien","chanteur"],
+  ["plombier","électricien"],["charpentier","maçon"],["menuisier","peintre en bâtiment"],
+  ["coiffeur","esthéticienne"],["pharmacien","médecin"],["vétérinaire","éleveur"],
+  ["astronome","météorologue"],["géologue","géographe"],["psychologue","médecin"],
+  ["styliste","couturier"],["bijoutier","horloger"],
+  ["archéologue","historien"],["sociologue","psychologue"],
+  // École, éducation & bureautique
+  ["crayon","stylo"],["cahier","carnet"],["tableau","ardoise"],["collège","lycée"],
+  ["bibliothèque","médiathèque"],["examen","contrôle"],["diplôme","brevet"],
+  ["règle","équerre"],["compas","rapporteur"],["calculatrice","règle"],["dictionnaire","encyclopédie"],
+  ["cartable","sac à dos"],["trousse","étui"],["surligneur","feutre"],["colle","scotch"],
+  ["tableau blanc","tableau noir"],["vidéoprojecteur","tableau"],
+  ["concours","examen"],["mention","diplôme"],["redoublement","saut de classe"],
+  // Matériaux & matières
+  ["or","argent"],["diamant","rubis"],["marbre","granit"],["bois","bambou"],
+  ["plastique","verre"],["acier","aluminium"],["soie","coton"],
+  ["cuir","tissu"],["carton","papier"],["laine","coton"],["béton","brique"],
+  // Nature, géographie & météo
+  ["plage","rivage"],["forêt","jungle"],["désert","savane"],["île","péninsule"],
+  ["montagne","colline"],["volcan","geyser"],["rivière","fleuve"],["lac","étang"],
+  ["falaise","dune"],["canyon","gorge"],["plateau","plaine"],
+  ["typhon","cyclone"],["tornade","tempête"],["grêle","neige"],
+  ["tsunami","raz-de-marée"],["séisme","avalanche"],["inondation","sécheresse"],
+  ["éclipse","arc-en-ciel"],["marée","courant"],["vague","houle"],
+  // Lieux, constructions & monuments
+  ["château","palais"],["église","cathédrale"],["pont","tunnel"],["tour","gratte-ciel"],
+  ["phare","tour"],["marché","supermarché"],["stade","gymnase"],["gare","aéroport"],
+  ["hôpital","clinique"],["prison","commissariat"],["hôtel","auberge"],
+  ["mosquée","synagogue"],["temple","église"],["abbaye","chapelle"],
+  ["cinéma","théâtre"],["zoo","aquarium"],["planétarium","musée"],["laboratoire","salle de classe"],
+  // Vêtements & accessoires
+  ["chemise","veste"],["pantalon","jean"],["robe","jupe"],["chapeau","casquette"],
+  ["manteau","imperméable"],["chaussures","bottes"],["gants","moufles"],["écharpe","bonnet"],
+  ["pull","sweat"],["short","bermuda"],["t-shirt","débardeur"],["costume","veste"],
+  ["pyjama","survêtement"],["combinaison","salopette"],
+  ["cravate","nœud papillon"],["ceinture","bretelles"],["collier","bracelet"],["bague","chevalière"],
+  ["lunettes","casque"],["montre","bracelet connecté"],["sac à dos","cartable"],["valise","sac de sport"],
+  ["sandales","tongs"],["baskets","chaussures de ville"],["chaussons","pantoufles"],
+  // Saisons, temps & calendrier
+  ["hiver","automne"],["printemps","été"],["orage","tempête"],["brouillard","brume"],
+  ["arc-en-ciel","aurore boréale"],["sécheresse","canicule"],
+  ["lundi","mercredi"],["samedi","dimanche"],["janvier","juillet"],["avril","octobre"],
+  ["matin","soir"],["midi","minuit"],["aube","crépuscule"],
+  // Émotions, sentiments & concepts
+  ["peur","angoisse"],["joie","bonheur"],["colère","frustration"],["amour","amitié"],
+  ["rêve","cauchemar"],["mensonge","secret"],["hasard","destin"],["silence","solitude"],
+  ["espoir","illusion"],["courage","audace"],["patience","persévérance"],["jalousie","envie"],
+  ["orgueil","arrogance"],["honte","gêne"],["nostalgie","ennui"],
+  ["curiosité","étonnement"],["confiance","méfiance"],["générosité","égoïsme"],
+  ["liberté","indépendance"],["justice","équité"],["vérité","mensonge"],["beauté","laideur"],
+  // Histoire & société
+  ["roi","président"],["guerre","bataille"],["loi","règlement"],["révolution","révolte"],
+  ["empire","royaume"],["élection","vote"],
+  ["dictature","démocratie"],["monarchie","république"],
+  ["impôt","amende"],["grève","manifestation"],["patron","employé"],
+  ["censure","liberté d'expression"],["diplomatie","négociation"],["boycott","sanction"],
+  // Sciences & médecine
+  ["atome","molécule"],["proton","électron"],
+  ["ADN","chromosome"],["cellule","tissu"],["organe","muscle"],
+  ["bactérie","virus"],["vaccin","médicament"],["antibiotique","comprimé"],
+  ["chirurgie","opération"],["radiographie","scanner"],
+  ["allergie","rhume"],["épidémie","pandémie"],["immunité","résistance"],
+  ["gravité","magnétisme"],["lumière","son"],["optique","acoustique"],
+  ["photosynthèse","respiration"],["évolution","adaptation"],["migration","hibernation"],
+  // Mythologie & fantastique
+  ["ange","démon"],["paradis","enfer"],["prière","méditation"],
+  ["Zeus","Poséidon"],["Athéna","Artémis"],["Apollon","Hermès"],
+  ["Thor","Odin"],["Loki","Freya"],
+  ["vampire","zombie"],["sorcière","fée"],["dragon","dinosaure"],["fantôme","esprit"],
+  ["superhéros","super-vilain"],["alien","robot"],["chevalier","samouraï"],
+  ["elfe","nain"],["ogre","troll"],["sirène","fée"],
+  ["épée magique","baguette"],["potion","élixir"],["amulette","talisman"],
+  ["Cendrillon","Blanche-Neige"],["Robin des Bois","Zorro"],
+  ["Merlin","Gandalf"],["Graal","trésor"],
+  ["Ulysse","Héraclès"],["Achille","Hector"],["Minotaure","Sphinx"],
+  // Cuisine & ustensiles
+  ["cuillère","fourchette"],["assiette","bol"],["casserole","poêle"],["four","micro-ondes"],
+  ["réfrigérateur","congélateur"],["spatule","louche"],
+  ["cocotte","casserole"],["grill","plancha"],
+  ["passoire","tamis"],["saladier","bol"],["carafe","bouteille"],
+  ["fouet","batteur"],["rouleau à pâtisserie","moule à gâteau"],["balance","verre doseur"],
+  // Corps humain & santé
+  ["cerveau","cœur"],["cœur","poumon"],["foie","rein"],["estomac","intestin"],
+  ["muscle","tendon"],["os","cartilage"],["veine","artère"],
+  ["peau","ongle"],["dent","gencive"],["langue","gorge"],
+  ["genou","coude"],["cheville","poignet"],["épaule","hanche"],["nuque","tempe"],
+  ["rotule","clavicule"],["colonne vertébrale","bassin"],
+  // Maison & ameublement
+  ["canapé","fauteuil"],["lit","matelas"],["armoire","commode"],["bureau","table"],
+  ["chaise","tabouret"],["lampe","lustre"],["rideau","store"],
+  ["tapis","parquet"],["carrelage","lino"],["papier peint","peinture murale"],
+  ["balcon","terrasse"],["jardin","cour"],["garage","cave"],["grenier","sous-sol"],
+  ["cuisine","salle de bain"],["salon","chambre"],["couloir","escalier"],
+  // Musique & sons
+  ["chanson","mélodie"],["rythme","tempo"],["gamme","accord"],
+  ["rock","métal"],["jazz","blues"],["classique","contemporain"],["électro","techno"],
+  ["reggae","ska"],["hip-hop","rap"],["soul","funk"],["country","folk"],
+  ["chorale","orchestre"],
+  // Voyage & tourisme
+  ["camping","hôtel"],["villa","bungalow"],["croisière","voyage en avion"],
+  ["passeport","carte d'identité"],["billet","réservation"],["guide","application"],
+  ["safari","randonnée"],["ski de fond","ski alpin"],
+  // Couleurs & formes
+  ["carré","rectangle"],["cercle","ellipse"],["triangle","trapèze"],["hexagone","pentagone"],
+  ["cube","sphère"],["cône","pyramide"],["cylindre","prisme"],
+  ["turquoise","bleu"],["rose","violet"],["écarlate","orange"],["ocre","beige"],
+  ["doré","argenté"],["noir","gris"],["blanc","crème"],
+  // Divers
+  ["Paris","Lyon"],["France","Belgique"],["soleil","lune"],["étoile","planète"],
+  ["magie","tour de passe-passe"],["rose","tulipe"],["chêne","hêtre"],
+  ["cadeau","surprise"],["fête","anniversaire"],["carnaval","fête foraine"],
+  ["rire","sourire"],["larme","soupir"],["applaudissement","sifflet"],
+  ["ombre","reflet"],["miroir","vitre"],["flamme","braise"],
+  ["labyrinthe","escape game"],["chasse au trésor","énigme"],["blague","devinette"],
+  ["tournesol","coquelicot"],["muguet","rose"],["lavande","romarin"],["cactus","bambou"],
+  // Informatique & réseaux sociaux
+  ["like","retweet"],["story","reel"],["podcast","vlog"],
+  ["stream","vidéo"],["influenceur","créateur de contenu"],["spam","pub"],
+  ["hashtag","tendance"],["viral","buzz"],["mème","gif"],["réseau social","forum"],
+  // Fêtes & événements
+  ["mariage","fiançailles"],["baptême","communion"],["anniversaire","fête"],
+  ["carnaval","défilé"],["concert","festival"],["compétition","tournoi"],
+  // Environnement
+  ["pollution","déchets"],["recyclage","compostage"],["déforestation","incendie"],
+  ["éolienne","panneau solaire"],["vélo","voiture électrique"],
+  ["biodiversité","espèce menacée"],["parc naturel","réserve naturelle"],
+  // Maths & sciences scolaires
+  ["addition","soustraction"],["multiplication","division"],["fraction","pourcentage"],
+  ["algèbre","géométrie"],["périmètre","aire"],["courbe","droite"],
+  ["masse","poids"],["vitesse","accélération"],["énergie","force"],
+  ["acide","base"],["réaction","transformation"],["mélange","solution"],
+  ["astéroïde","météorite"],["comète","étoile filante"],["galaxie","étoile"],
+  ["orbite","trajectoire"],["télescope","jumelles"],["astronaute","cosmonaute"],
+  ["stalactite","stalagmite"],["volcan","tremblement de terre"],
+  // Langue française
+  ["métaphore","comparaison"],["ironie","sarcasme"],["monologue","dialogue"],
+  ["narrateur","auteur"],["introduction","conclusion"],
+  ["sonnet","poème"],["fable","conte"],["épopée","légende"],
+  ["préfixe","suffixe"],["synonyme","antonyme"],["homonyme","paronyme"],
+  ["argot","verlan"],["accent","dialecte"],["grammaire","orthographe"],
+  // Jeux & loisirs jeunes
+  ["yoyo","toupie"],["cerf-volant","frisbee"],["patin à roulettes","skateboard"],
+  ["trampoline","balançoire"],["Lego","Playmobil"],["Monopoly","Risk"],
+  ["Scrabble","Boggle"],["dominos","cartes"],["uno","bataille"],
+  ["fléchettes","billard"],["babyfoot","ping-pong"],["pétanque","bowling"],
+  // Jeux vidéo (vocabulaire courant)
+  ["RPG","jeu d'aventure"],["FPS","jeu de tir"],["battle royale","jeu en ligne"],
+  ["simulation","jeu de gestion"],["jeu de plateforme","jeu d'action"],
+  // Outils courants
+  ["marteau","tournevis"],["perceuse","visseuse"],["scie","cutter"],
+  ["pince","tenaille"],["aspirateur","balai"],["tuyau","robinet"],
+  ["tondeuse","débroussailleuse"],["arrosoir","tuyau d'arrosage"],["sécateur","ciseaux"],
+  // Cinéma & séries
+  ["thriller","film d'horreur"],["comédie romantique","comédie"],
+  ["western","film d'action"],["documentaire","reportage"],["anime","dessin animé"],
+  ["gros plan","plan large"],["zoom","fondu"],["biopic","documentaire"],
+  // Mode & beauté
+  ["vintage","occasion"],["teinture","balayage"],["dreadlocks","tresses"],
+  ["chignon","queue de cheval"],["mascara","rouge à lèvres"],["maquillage","soin"],
+  // Sport de compétition
+  ["marathon","sprint"],["saut en hauteur","saut à la perche"],["lancer du disque","lancer du poids"],
+  ["slalom","descente"],["curling","hockey sur glace"],["padel","squash"],
+  ["judo","karaté"],["sumo","lutte"],["kung-fu","boxe"],
+  ["belote","tarot"],["uno","cartes"],
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let state = {
+  players: [],           // [{name, role, word, eliminated, score}]
+  citizenWord: '',
+  undercoverWord: '',
+  undercoverCount: 1,
+  hasMrWhite: false,
+  round: 1,
+  revealIndex: 0,
+  wordRevealed: false,
+  votes: {},             // {playerName: votes}
+  currentVoterIdx: 0,
+  selectedVote: null,
+  gamePhase: 'setup',    // setup | reveal | play | vote | elimination | gameover
+  wordPairIndex: -1,
+};
+
+// Persistent scores
+function getScores() {
+  try { return JSON.parse(localStorage.getItem('undercover_scores') || '{}'); }
+  catch { return {}; }
+}
+function addScore(name) {
+  const s = getScores();
+  s[name] = (s[name] || 0) + 1;
+  localStorage.setItem('undercover_scores', JSON.stringify(s));
+}
+function clearScores() {
+  if (confirm('Effacer tous les scores ?')) {
+    localStorage.removeItem('undercover_scores');
+    renderScores();
+    notify('Scores effacés');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'screen-scores') renderScores();
+}
+
+function notify(msg, duration = 2500) {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════════════════
+function updateRoleToggles() {
+  const uc = document.getElementById('toggle-undercover').checked;
+  document.getElementById('undercover-count-row').style.display = uc ? '' : 'none';
+}
+
+function toggleWordMode() {
+  const random = document.getElementById('toggle-random-words').checked;
+  document.getElementById('custom-words-section').style.display = random ? 'none' : '';
+  document.getElementById('random-words-info').style.display = random ? '' : 'none';
+}
+
+function renderPlayersList() {
+  const ul = document.getElementById('players-list');
+  ul.innerHTML = '';
+  state.players.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="player-name">${p.name}</span>
+      <button class="remove-btn" onclick="removePlayer(${i})" title="Retirer">✕</button>`;
+    ul.appendChild(li);
+  });
+}
+
+function addPlayer() {
+  const input = document.getElementById('player-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (state.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+    notify('Ce nom existe déjà !'); return;
+  }
+  if (state.players.length >= 12) { notify('Maximum 12 joueurs'); return; }
+  state.players.push({ name, score: 0 });
+  input.value = '';
+  renderPlayersList();
+  input.focus();
+}
+
+function removePlayer(idx) {
+  state.players.splice(idx, 1);
+  renderPlayersList();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  START GAME
+// ═══════════════════════════════════════════════════════════════
+function startGame() {
+  const n = state.players.length;
+  if (n < 3) { notify('Il faut au moins 3 joueurs !'); return; }
+
+  const hasUndercover = document.getElementById('toggle-undercover').checked;
+  const hasMrWhite = document.getElementById('toggle-mrwhite').checked;
+  if (!hasUndercover && !hasMrWhite) { notify('Activez au moins un rôle imposteur !'); return; }
+
+  state.undercoverCount = hasUndercover ? parseInt(document.getElementById('undercover-count').value) : 0;
+  state.hasMrWhite = hasMrWhite;
+
+  // Check enough citizens remain
+  const impostors = state.undercoverCount + (hasMrWhite ? 1 : 0);
+  if (impostors >= n - 1) { notify('Trop d\'imposteurs pour ce nombre de joueurs !'); return; }
+
+  // Pick words
+  const useRandom = document.getElementById('toggle-random-words').checked;
+  if (useRandom) {
+    // Load used indices and blacklist from localStorage
+    let usedIndices = [];
+    let blacklist = [];
+    try { usedIndices = JSON.parse(localStorage.getItem('undercover_used_pairs') || '[]'); } catch {}
+    try { blacklist = JSON.parse(localStorage.getItem('undercover_blacklist') || '[]'); } catch {}
+    // Pairs available = not blacklisted
+    const allValid = WORD_PAIRS.map((_, i) => i).filter(i => !blacklist.includes(i));
+    // If all valid pairs have been used, reset used list
+    const unusedValid = allValid.filter(i => !usedIndices.includes(i));
+    if (unusedValid.length === 0) {
+      usedIndices = [];
+      localStorage.setItem('undercover_used_pairs', JSON.stringify(usedIndices));
+      notify('Toutes les paires ont été jouées — on recommence !');
+    }
+    // Pick a random unused (non-blacklisted) index
+    const available = allValid.filter(i => !usedIndices.includes(i));
+    const idx = available[Math.floor(Math.random() * available.length)];
+    usedIndices.push(idx);
+    localStorage.setItem('undercover_used_pairs', JSON.stringify(usedIndices));
+    updatePairsCount();
+    // Swap occasionally for variety
+    const pair = Math.random() < 0.5 ? WORD_PAIRS[idx] : [WORD_PAIRS[idx][1], WORD_PAIRS[idx][0]];
+    state.citizenWord = pair[0];
+    state.undercoverWord = pair[1];
+    state.wordPairIndex = idx;
+  } else {
+    const cw = document.getElementById('citizen-word').value.trim();
+    const uw = document.getElementById('undercover-word').value.trim();
+    if (!cw || (!uw && hasUndercover)) { notify('Remplissez les deux mots !'); return; }
+    state.citizenWord = cw;
+    state.undercoverWord = uw;
+  }
+
+  // Assign roles
+  const shuffledPlayers = shuffle([...Array(n).keys()]);
+  const roleAssignment = [];
+
+  // Fill citizens
+  for (let i = 0; i < n; i++) roleAssignment.push('citizen');
+  // Assign undercov­er
+  for (let i = 0; i < state.undercoverCount; i++) roleAssignment[i] = 'undercover';
+  // Assign mr. white
+  if (hasMrWhite) roleAssignment[state.undercoverCount] = 'mrwhite';
+
+  // Map to shuffled players
+  state.players.forEach((p, i) => {
+    const role = roleAssignment[shuffledPlayers.indexOf(i)];
+    p.role = role;
+    p.eliminated = false;
+    p.word = role === 'citizen' ? state.citizenWord
+           : role === 'undercover' ? state.undercoverWord
+           : '???';
+  });
+
+  state.round = 1;
+  state.revealIndex = 0;
+  state.wordRevealed = false;
+  state.gamePhase = 'reveal';
+
+  renderRevealScreen();
+  showScreen('screen-reveal');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REVEAL SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderRevealScreen() {
+  const i = state.revealIndex;
+  const total = state.players.length;
+  const player = state.players[i];
+
+  document.getElementById('reveal-player-name').textContent = player.name;
+  document.getElementById('reveal-idx').textContent = i + 1;
+  document.getElementById('reveal-total').textContent = total;
+
+  // Reset
+  document.getElementById('word-hidden').style.display = '';
+  document.getElementById('word-revealed').style.display = 'none';
+  document.getElementById('reveal-next-btn').disabled = true;
+  document.getElementById('reveal-next-btn').textContent = i < total - 1 ? 'Joueur suivant →' : 'Commencer la partie →';
+
+  const box = document.getElementById('word-box');
+  box.className = 'word-box';
+  state.wordRevealed = false;
+}
+
+function revealWord() {
+  if (state.wordRevealed) return;
+  const player = state.players[state.revealIndex];
+  state.wordRevealed = true;
+
+  document.getElementById('word-hidden').style.display = 'none';
+  document.getElementById('word-revealed').style.display = '';
+  document.getElementById('secret-word-text').textContent =
+    player.role === 'mrwhite' ? '— Aucun mot —' : player.word;
+
+  // Seul l'homme invisible voit son rôle affiché — citoyens et agents secrets voient juste leur mot
+  const badgeContainer = document.getElementById('role-badge-container');
+  badgeContainer.innerHTML = player.role === 'mrwhite'
+    ? `<span class="role-badge badge-mrwhite">👁️ Homme invisible — tu n'as aucun mot !</span>`
+    : '';
+
+  const box = document.getElementById('word-box');
+  box.className = 'word-box revealed';
+
+  document.getElementById('reveal-next-btn').disabled = false;
+}
+
+function nextReveal() {
+  state.revealIndex++;
+  if (state.revealIndex >= state.players.length) {
+    renderPlayScreen();
+    showScreen('screen-play');
+  } else {
+    renderRevealScreen();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PLAY SCREEN
+// ═══════════════════════════════════════════════════════════════
+function alivePlayers() {
+  return state.players.filter(p => !p.eliminated);
+}
+
+function renderPlayScreen() {
+  document.getElementById('play-round').textContent = state.round;
+  const alive = alivePlayers();
+  document.getElementById('play-alive-count').textContent = alive.length;
+
+  const list = document.getElementById('turn-order-list');
+  list.innerHTML = '';
+  const order = shuffle(alive);
+  order.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = p.name;
+    list.appendChild(li);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  VOTE SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderVoteScreen() {
+  const alive = alivePlayers();
+  state.votes = {};
+  alive.forEach(p => state.votes[p.name] = 0);
+
+  document.getElementById('vote-tally').style.display = 'none';
+  updateVoteUI();
+  renderVoteList();
+}
+
+function totalVotesCast() {
+  return Object.values(state.votes).reduce((a, b) => a + b, 0);
+}
+
+function updateVoteUI() {
+  const alive = alivePlayers();
+  const total = totalVotesCast();
+  const max = alive.length;
+  document.getElementById('votes-cast').textContent = total;
+  document.getElementById('votes-needed').textContent = max;
+
+  const btn = document.getElementById('confirm-vote-btn');
+  if (total === max) {
+    btn.classList.add('btn-glow');
+  } else {
+    btn.classList.remove('btn-glow');
+  }
+}
+
+function renderVoteList() {
+  const alive = alivePlayers();
+  const max = alive.length;
+  const list = document.getElementById('vote-list');
+  list.innerHTML = '';
+  alive.forEach(p => {
+    const v = state.votes[p.name] || 0;
+    const total = totalVotesCast();
+    const li = document.createElement('li');
+    li.className = 'vote-item' + (v > 0 ? ' has-votes' : '');
+    li.innerHTML = `
+      <button class="vote-btn minus" onclick="changeVote('${p.name}', -1)" ${v <= 0 ? 'disabled' : ''}>−</button>
+      <span class="vote-name">${p.name}</span>
+      <span class="vote-count ${v > 0 ? 'has-votes' : ''}">${v}</span>
+      <button class="vote-btn plus" onclick="changeVote('${p.name}', +1)" ${total >= max ? 'disabled' : ''}>+</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function changeVote(name, delta) {
+  const alive = alivePlayers();
+  const max = alive.length;
+  const current = state.votes[name] || 0;
+  const total = totalVotesCast();
+
+  if (delta > 0 && total >= max) return;
+  if (delta < 0 && current <= 0) return;
+
+  state.votes[name] = current + delta;
+  updateVoteUI();
+  renderVoteList();
+}
+
+function confirmVote() {
+  const total = totalVotesCast();
+  if (total === 0) { notify('Distribuez au moins un vote !'); return; }
+  showVoteTally();
+}
+
+function showVoteTally() {
+  const sorted = Object.entries(state.votes).sort((a, b) => b[1] - a[1]);
+  const tallyCont = document.getElementById('vote-tally-content');
+  tallyCont.innerHTML = sorted.map(([name, v]) =>
+    `<div class="stat-row"><span>${name}</span><span class="stat-val">${v} vote${v > 1 ? 's' : ''}</span></div>`
+  ).join('');
+  document.getElementById('vote-tally').style.display = '';
+
+  const maxVotes = sorted[0][1];
+  // Ignorer les joueurs à 0 vote pour l'égalité
+  const topVoters = sorted.filter(([, v]) => v === maxVotes && v > 0);
+
+  if (topVoters.length > 1) {
+    // Égalité — re-vote uniquement parmi les ex-aequo
+    notify('Égalité ! Revotez parmi les suspects.', 3000);
+    const tiedNames = topVoters.map(([n]) => n);
+    state.votes = {};
+    tiedNames.forEach(n => state.votes[n] = 0);
+
+    // Reconstruire la liste avec seulement les ex-aequo
+    // On simule un alivePlayers réduit pour le re-vote
+    state._tiedNames = tiedNames;
+
+    const list = document.getElementById('vote-list');
+    list.innerHTML = '';
+    const alive = alivePlayers();
+    tiedNames.forEach(name => {
+      const li = document.createElement('li');
+      li.className = 'vote-item';
+      li.innerHTML = `
+        <button class="vote-btn minus" onclick="changeTiedVote('${name}', -1)" disabled>−</button>
+        <span class="vote-name">${name}</span>
+        <span class="vote-count" id="tied-count-${name}">0</span>
+        <button class="vote-btn plus" onclick="changeTiedVote('${name}', +1)">+</button>
+      `;
+      list.appendChild(li);
+    });
+
+    document.getElementById('votes-cast').textContent = 0;
+    document.getElementById('votes-needed').textContent = alive.length;
+    document.getElementById('confirm-vote-btn').classList.remove('btn-glow');
+    document.getElementById('vote-tally').style.display = 'none';
+    return;
+  }
+
+  // Éliminer le joueur le plus voté
+  const eliminatedName = sorted[0][0];
+  eliminatePlayer(eliminatedName);
+}
+
+function changeTiedVote(name, delta) {
+  const alive = alivePlayers();
+  const max = alive.length;
+  const current = state.votes[name] || 0;
+  const total = Object.values(state.votes).reduce((a, b) => a + b, 0);
+
+  if (delta > 0 && total >= max) return;
+  if (delta < 0 && current <= 0) return;
+
+  state.votes[name] = current + delta;
+
+  // Mettre à jour l'affichage du re-vote
+  const tiedNames = state._tiedNames;
+  tiedNames.forEach(n => {
+    const el = document.getElementById('tied-count-' + n);
+    if (el) el.textContent = state.votes[n] || 0;
+  });
+
+  // Mettre à jour les boutons +/-
+  const newTotal = Object.values(state.votes).reduce((a, b) => a + b, 0);
+  document.getElementById('votes-cast').textContent = newTotal;
+
+  const btn = document.getElementById('confirm-vote-btn');
+  btn.classList.toggle('btn-glow', newTotal === max);
+
+  // Désactiver/activer les boutons
+  const list = document.getElementById('vote-list');
+  list.querySelectorAll('.vote-btn.plus').forEach(b => b.disabled = newTotal >= max);
+  list.querySelectorAll('.vote-btn.minus').forEach((b, i) => {
+    b.disabled = (state.votes[tiedNames[i]] || 0) <= 0;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ELIMINATION
+// ═══════════════════════════════════════════════════════════════
+function eliminatePlayer(name) {
+  const player = state.players.find(p => p.name === name);
+  player.eliminated = true;
+
+  document.getElementById('elim-name').textContent = player.name;
+  document.getElementById('mrwhite-guess-section').style.display = 'none';
+  document.getElementById('elim-continue-section').style.display = '';
+  document.getElementById('game-status-msg').style.display = 'none';
+  document.getElementById('elim-continue-btn').textContent = 'Continuer →';
+
+  let badgeClass = '', badgeText = '', icon = '';
+  if (player.role === 'citizen') {
+    badgeClass = 'badge-citizen'; badgeText = '👤 Citoyen'; icon = '😱';
+  } else if (player.role === 'undercover') {
+    badgeClass = 'badge-undercover'; badgeText = '🕵️ Agent secret'; icon = '🎉';
+  } else {
+    badgeClass = 'badge-mrwhite'; badgeText = "👁️ Homme invisible"; icon = '🤫';
+  }
+
+  document.getElementById('elim-icon').textContent = icon;
+  document.getElementById('elim-title').textContent = player.role === 'citizen' ? 'Un innocent éliminé !' : 'Imposteur démasqué !';
+  document.getElementById('elim-role-badge').innerHTML = `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
+  // Le mot n'est révélé qu'en fin de partie — pendant la partie, seul l'homme invisible est identifié
+  document.getElementById('elim-word').textContent = '';
+
+  if (player.role === 'mrwhite') {
+    document.getElementById('mrwhite-guess-section').style.display = '';
+    document.getElementById('elim-continue-section').style.display = 'none';
+  }
+
+  showScreen('screen-elimination');
+
+  // Check win condition after mr white is handled separately
+  if (player.role !== 'mrwhite') {
+    checkWinCondition();
+  }
+}
+
+function judgeMrWhite() {
+  const guess = document.getElementById('mrwhite-guess-input').value.trim().toLowerCase();
+  const correct = state.citizenWord.toLowerCase();
+  const mrWhite = state.players.find(p => p.role === 'mrwhite');
+
+  if (guess === correct) {
+    // Mr. White wins!
+    document.getElementById('mrwhite-guess-section').style.display = 'none';
+    document.getElementById('elim-continue-section').style.display = '';
+    document.getElementById('game-status-msg').style.display = '';
+    document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">👁️</span><br>L'homme invisible a deviné "${state.citizenWord}" !<br><strong style="color:var(--mrwhite)">L'homme invisible gagne !</strong>`;
+    document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
+    document.getElementById('elim-continue-btn').onclick = () => endGame('mrwhite');
+    addScore(mrWhite.name);
+  } else {
+    notify("Mauvaise réponse !", 2500);
+    document.getElementById('mrwhite-guess-section').style.display = 'none';
+    document.getElementById('elim-continue-section').style.display = '';
+    checkWinCondition(true);
+  }
+}
+
+function checkWinCondition(afterMrWhite = false) {
+  const alive = alivePlayers();
+  const aliveUndercover = alive.filter(p => p.role === 'undercover');
+  const aliveCitizens = alive.filter(p => p.role === 'citizen');
+  const aliveMrWhite = alive.filter(p => p.role === 'mrwhite');
+  const aliveImpostors = aliveUndercover.length + aliveMrWhite.length;
+
+  // Citoyens gagnent : plus aucun imposteur en vie
+  if (aliveImpostors === 0) {
+    document.getElementById('game-status-msg').style.display = '';
+    document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">🏛️</span><br><strong style="color:var(--citizen)">Les Citoyens gagnent !</strong>`;
+    document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
+    document.getElementById('elim-continue-btn').onclick = () => endGame('citizens');
+    aliveCitizens.forEach(p => addScore(p.name));
+    return;
+  }
+
+  // Imposteurs gagnent : ils sont strictement plus nombreux que les citoyens
+  // (la majorité leur est acquise, les citoyens ne peuvent plus l'emporter)
+  if (aliveImpostors >= aliveCitizens.length) {
+    document.getElementById('game-status-msg').style.display = '';
+    document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">🕵️</span><br><strong style="color:var(--undercover)">Les imposteurs gagnent !</strong>`;
+    document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
+    document.getElementById('elim-continue-btn').onclick = () => endGame('undercover');
+    aliveUndercover.forEach(p => addScore(p.name));
+    aliveMrWhite.forEach(p => addScore(p.name));
+    return;
+  }
+
+  // La partie continue
+  document.getElementById('elim-continue-btn').textContent = 'Continuer la partie →';
+  document.getElementById('elim-continue-btn').onclick = continueAfterElim;
+}
+
+function continueAfterElim() {
+  state.round++;
+  renderPlayScreen();
+  renderVoteScreen();
+  showScreen('screen-play');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GAME OVER
+// ═══════════════════════════════════════════════════════════════
+function endGame(winner) {
+  const icons = { citizens: '🏛️', undercover: '🕵️', mrwhite: '👁️' };
+  const titles = { citizens: 'Victoire des Citoyens !', undercover: 'Les Agents secrets gagnent !', mrwhite: "L'homme invisible l'emporte !" };
+  const subs = {
+    citizens: 'Tous les imposteurs ont été démasqués.',
+    undercover: 'Les agents secrets ont su rester dans l\'ombre.',
+    mrwhite: 'Mr. White a deviné le mot des citoyens.',
+  };
+
+  document.getElementById('go-icon').textContent = icons[winner];
+  document.getElementById('go-title').textContent = titles[winner];
+  document.getElementById('go-subtitle').textContent = subs[winner];
+
+  document.getElementById('go-citizen-word').textContent = state.citizenWord;
+  const ucRow = document.getElementById('go-undercover-row');
+  if (state.undercoverCount > 0) {
+    ucRow.style.display = '';
+    document.getElementById('go-undercover-word').textContent = state.undercoverWord;
+  } else {
+    ucRow.style.display = 'none';
+  }
+
+  // Final reveal
+  const revealList = document.getElementById('final-reveal-list');
+  revealList.innerHTML = '';
+  state.players.forEach(p => {
+    let badgeClass = '', badgeText = '';
+    if (p.role === 'citizen') { badgeClass = 'badge-citizen'; badgeText = '👤 Citoyen'; }
+    else if (p.role === 'undercover') { badgeClass = 'badge-undercover'; badgeText = '🕵️ Agent secret'; }
+    else { badgeClass = 'badge-mrwhite'; badgeText = "👁️ Homme invisible"; }
+
+    const div = document.createElement('div');
+    div.className = 'stat-row';
+    div.innerHTML = `
+      <div>
+        <div style="font-size:0.9rem;${p.eliminated ? 'text-decoration:line-through;opacity:0.5' : ''}">${p.name}</div>
+        <span class="role-badge ${badgeClass}" style="margin-top:4px;display:inline-block">${badgeText}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--muted)">${p.role === 'mrwhite' ? '—' : p.word}</div>
+    `;
+    revealList.appendChild(div);
+  });
+
+  showScreen('screen-gameover');
+}
+
+function reportWordPair() {
+  const w1 = state.citizenWord || '?';
+  const w2 = state.undercoverWord || '?';
+  const subject = encodeURIComponent('undercover');
+  const body = encodeURIComponent(`La paire de mots ${w1}/${w2} pose problème.`);
+
+  // Si on est en phase de distribution des rôles, on blackliste et on remet à zéro
+  if (state.gamePhase === 'reveal') {
+    // Retirer l'index de la liste des paires utilisées (déjà marqué comme joué)
+    // et l'ajouter dans une liste permanente de paires blacklistées
+    const idx = state.wordPairIndex;
+    if (idx >= 0) {
+      let blacklist = [];
+      try { blacklist = JSON.parse(localStorage.getItem('undercover_blacklist') || '[]'); } catch {}
+      if (!blacklist.includes(idx)) blacklist.push(idx);
+      localStorage.setItem('undercover_blacklist', JSON.stringify(blacklist));
+      updatePairsCount();
+
+      // Aussi retirer cette paire des "used" pour ne pas biaiser le compteur
+      let usedIndices = [];
+      try { usedIndices = JSON.parse(localStorage.getItem('undercover_used_pairs') || '[]'); } catch {}
+      usedIndices = usedIndices.filter(i => i !== idx);
+      localStorage.setItem('undercover_used_pairs', JSON.stringify(usedIndices));
+    }
+
+    // Remettre la partie à zéro
+    state.gamePhase = 'setup';
+    const names = state.players.map(p => p.name);
+    state.players = names.map(n => ({ name: n, score: getScores()[n] || 0 }));
+    showScreen('screen-setup');
+    renderPlayersList();
+    notify('Paire signalée — la partie a été annulée.');
+  }
+
+  window.location.href = `mailto:s32.dumortier@gmail.com?subject=${subject}&body=${body}`;
+}
+
+function rematch() {
+  // Keep same players, same settings — restart
+  const names = state.players.map(p => p.name);
+  state.players = names.map(n => ({ name: n, score: 0 }));
+  showScreen('screen-setup');
+  renderPlayersList();
+  notify('Même équipe, nouvelle partie !');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCORES SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderScores() {
+  const scores = getScores();
+  const list = document.getElementById('scores-list');
+  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+  if (entries.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:var(--muted)">Aucun score enregistré.</p>';
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  list.innerHTML = entries.map(([name, pts], i) => `
+    <div class="score-item">
+      <div>
+        <span style="margin-right:8px">${medals[i] || ''}</span>
+        <span>${name}</span>
+      </div>
+      <span class="score-pts">${pts} victoire${pts > 1 ? 's' : ''}</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT & SCREEN OVERRIDE
+// ═══════════════════════════════════════════════════════════════
+
+// Override showScreen for vote to trigger render
+const _showScreen = showScreen;
+window.showScreen = function(id) {
+  _showScreen(id);
+  if (id === 'screen-vote') renderVoteScreen();
+  if (id === 'screen-setup') updatePairsCount();
+};
+
+// Init word pairs count
+function enterFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+}
+
+function updatePairsCount() {
+  let usedIndices = [];
+  let blacklist = [];
+  try { usedIndices = JSON.parse(localStorage.getItem('undercover_used_pairs') || '[]'); } catch {}
+  try { blacklist = JSON.parse(localStorage.getItem('undercover_blacklist') || '[]'); } catch {}
+  const total = WORD_PAIRS.length;
+  const blacklisted = blacklist.length;
+  const used = usedIndices.filter(i => !blacklist.includes(i)).length;
+  const available = total - blacklisted - used;
+  const el = document.getElementById('pairs-count');
+  el.textContent = available;
+  // Tooltip détaillé
+  el.title = `${total} paires au total — ${blacklisted} signalée(s) — ${used} déjà jouée(s)`;
+}
+updatePairsCount();
+</script>
+</body>
+</html>
