@@ -562,6 +562,7 @@
     transition: 0.2s;
   }
   .toggle input:checked + .toggle-slider { background: var(--accent); }
+  #toggle-oracle:checked + .toggle-slider { background: var(--oracle) !important; }
   .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
   /* ─── MrWhite guess ─── */
@@ -688,7 +689,10 @@
     <p class="mt8">Paramétrez la partie.</p>
 
     <div class="card mt24">
-      <h3>Joueurs</h3>
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h3>Joueurs</h3>
+        <span id="player-count" style="font-size:1.1rem;font-weight:500;color:var(--accent)"></span>
+      </div>
       <div class="field mt16">
         <div class="inline-row">
           <input type="text" id="player-input" placeholder="Nom du joueur…" maxlength="20" onkeydown="if(event.key==='Enter')addPlayer()">
@@ -745,22 +749,17 @@
             <div class="toggle-label" style="color:var(--oracle)">🔮 Oracle</div>
             <div class="toggle-desc">Connaît les deux mots, aide l'homme invisible</div>
           </div>
-        </div>
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-            <button class="btn btn-sm" id="oracle-minus" onclick="changeCount('oracle',-1)" style="width:36px;flex-shrink:0;background:var(--surface);color:var(--muted);border:none">−</button>
-            <span style="font-size:0.85rem;color:var(--muted);flex:1;text-align:center">
-              <span id="oracle-val">0</span> oracle
-            </span>
-            <button class="btn btn-sm" id="oracle-plus" onclick="changeCount('oracle',+1)" style="width:36px;flex-shrink:0;background:var(--oracle);color:#fff;border:none">+</button>
-          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-oracle" onchange="updateCountButtons()">
+            <span class="toggle-slider" style="background:var(--border)"></span>
+          </label>
         </div>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="words-card">
       <h3>Mots</h3>
-      <div class="toggle-row mt8">
+      <div id="words-toggle-row" class="toggle-row mt8">
         <div>
           <div class="toggle-label">Mots aléatoires</div>
           <div class="toggle-desc">Piocher dans la liste intégrée</div>
@@ -774,12 +773,13 @@
       <div id="custom-words-section" style="display:none">
         <div class="field mt16">
           <label>Mot des citoyens</label>
-          <input type="text" id="citizen-word" placeholder="ex: chien">
+          <input type="text" id="citizen-word" placeholder="ex: chien" oninput="resetWordsConfirm()">
         </div>
         <div class="field">
           <label>Mot des agents secrets</label>
-          <input type="text" id="undercover-word" placeholder="ex: loup">
+          <input type="text" id="undercover-word" placeholder="ex: loup" oninput="resetWordsConfirm()">
         </div>
+        <button class="btn btn-primary mt8" id="confirm-words-btn" onclick="confirmCustomWords()" style="background:var(--accent);color:#000">✓ Valider les mots</button>
       </div>
 
       <div id="random-words-info" class="word-pairs-info mt8">
@@ -1420,6 +1420,7 @@ let state = {
   hasMrWhite: false,
   mrwhiteCount: 0,
   hasOracle: false,
+  wordsConfirmed: false,
   round: 1,
   revealIndex: 0,
   wordRevealed: false,
@@ -1490,7 +1491,7 @@ function updateCountButtons() {
   const n = state.players.length;
   const uc = parseInt(document.getElementById('uc-val').textContent) || 1;
   const mw = parseInt(document.getElementById('mw-val').textContent) || 0;
-  const oracle = parseInt(document.getElementById('oracle-val').textContent) || 0;
+  const oracle = parseInt(document.getElementById('oracle-val')?.textContent) || 0;
 
   // UC: min 1, max such that uc + mw < n-1
   // Citizens must be strictly majority: impostors < n/2
@@ -1518,24 +1519,20 @@ function updateCountButtons() {
   document.getElementById('mw-plural').textContent = mw > 1 ? 's' : '';
   document.getElementById('mw-plural2').textContent = mw > 1 ? 's' : '';
 
-  // Oracle: only available if n >= 10 and at least 1 mrwhite
+  // Oracle toggle: visible seulement à partir de 10 joueurs
   const oracleRow = document.getElementById('oracle-row');
   if (oracleRow) {
     const oracleVisible = n >= 10;
     oracleRow.style.display = oracleVisible ? '' : 'none';
-    if (!oracleVisible && oracle > 0) {
-      document.getElementById('oracle-val').textContent = 0;
+    if (!oracleVisible) {
+      const tog = document.getElementById('toggle-oracle');
+      if (tog) tog.checked = false;
     }
-    const oracleMinus = document.getElementById('oracle-minus');
-    const oraclePlus = document.getElementById('oracle-plus');
-    if (oracleMinus && oraclePlus) {
-      const oracleVal = parseInt(document.getElementById('oracle-val').textContent) || 0;
-      oracleMinus.disabled = oracleVal <= 0;
-      oraclePlus.disabled = oracleVal >= 1;
-      oracleMinus.style.background = oracleVal <= 0 ? 'var(--surface)' : 'var(--oracle)';
-      oracleMinus.style.color = oracleVal <= 0 ? 'var(--muted)' : '#fff';
-      oraclePlus.style.background = oracleVal >= 1 ? 'var(--surface)' : 'var(--oracle)';
-      oraclePlus.style.color = oracleVal >= 1 ? 'var(--muted)' : '#fff';
+    // Style the slider with oracle color when checked
+    const tog = document.getElementById('toggle-oracle');
+    if (tog) {
+      const slider = tog.nextElementSibling;
+      if (slider) slider.style.background = tog.checked ? 'var(--oracle)' : '';
     }
   }
 
@@ -1558,22 +1555,43 @@ function updateRoleToggles() {
 }
 
 function toggleWordMode() {
+  if (state.wordsConfirmed) return; // cadre déjà masqué, ne rien faire
   const random = document.getElementById('toggle-random-words').checked;
   document.getElementById('custom-words-section').style.display = random ? 'none' : '';
   document.getElementById('random-words-info').style.display = random ? '' : 'none';
+  state.wordsConfirmed = false;
+}
+
+function confirmCustomWords() {
+  const cw = document.getElementById('citizen-word').value.trim();
+  const uw = document.getElementById('undercover-word').value.trim();
+  if (!cw || !uw) { notify('Remplissez les deux mots !'); return; }
+  state.citizenWord = cw;
+  state.undercoverWord = uw;
+  state.wordsConfirmed = true;
+  // Masquer le cadre entier — toggle inclus, plus moyen de retrouver les mots
+  document.getElementById('words-card').style.display = 'none';
+  notify('Mots enregistrés !');
+}
+
+function resetWordsConfirm() {
+  state.wordsConfirmed = false;
 }
 
 function renderPlayersList() {
   const ul = document.getElementById('players-list');
   ul.innerHTML = '';
-  state.players.forEach((p, i) => {
+  state.players.slice().reverse().forEach((p, i) => {
+    const realIdx = state.players.length - 1 - i;
     const li = document.createElement('li');
     li.innerHTML = `<span class="player-name">${p.name}</span>
-      <button class="remove-btn" onclick="removePlayer(${i})" title="Retirer">✕</button>`;
+      <button class="remove-btn" onclick="removePlayer(${realIdx})" title="Retirer">✕</button>`;
     ul.appendChild(li);
   });
   // Show/hide roles card
   const n = state.players.length;
+  const countEl = document.getElementById('player-count');
+  if (countEl) countEl.textContent = n > 0 ? n : '';
   const rolesCard = document.getElementById('roles-card');
   if (rolesCard) rolesCard.style.display = n >= 3 ? '' : 'none';
 
@@ -1586,8 +1604,8 @@ function renderPlayersList() {
     ucEl.textContent = defUC;
     mwEl.textContent = defMW;
     // Reset oracle if below threshold
-    const oracleEl = document.getElementById('oracle-val');
-    if (oracleEl && n < 10) oracleEl.textContent = 0;
+    const oracleToggle = document.getElementById('toggle-oracle');
+    if (oracleToggle && n < 10) oracleToggle.checked = false;
     updateCountButtons();
   }
 }
@@ -1620,9 +1638,8 @@ function startGame() {
 
   const ucCount = parseInt(document.getElementById('uc-val').textContent) || 1;
   const mwCount = parseInt(document.getElementById('mw-val').textContent) || 0;
-  const oracleCount = n >= 10 ? (parseInt(document.getElementById('oracle-val').textContent) || 0) : 0;
+  const hasOracle = n >= 10 && (document.getElementById('toggle-oracle')?.checked || false);
   const hasMrWhite = mwCount > 0;
-  const hasOracle = oracleCount > 0;
   if (ucCount < 1) { notify('Il faut au moins 1 agent secret !'); return; }
 
   state.undercoverCount = ucCount;
@@ -1663,11 +1680,8 @@ function startGame() {
     state.undercoverWord = pair[1];
     state.wordPairIndex = idx;
   } else {
-    const cw = document.getElementById('citizen-word').value.trim();
-    const uw = document.getElementById('undercover-word').value.trim();
-    if (!cw || (!uw && hasUndercover)) { notify('Remplissez les deux mots !'); return; }
-    state.citizenWord = cw;
-    state.undercoverWord = uw;
+    if (!state.wordsConfirmed) { notify('Validez d\'abord les mots !'); return; }
+    // Les mots sont déjà stockés dans state.citizenWord / state.undercoverWord via confirmCustomWords()
   }
 
   // Assign roles
@@ -1969,10 +1983,14 @@ function eliminatePlayer(name) {
     badgeClass = 'badge-mrwhite'; badgeText = "👁️ Homme invisible"; icon = '🤫';
   }
 
-  document.getElementById('elim-icon').textContent = icon;
-  document.getElementById('elim-title').textContent = player.role === 'citizen' ? 'Un innocent éliminé !' : player.role === 'oracle' ? 'L\'Oracle est démasqué !' : 'Imposteur démasqué !';
-  document.getElementById('elim-role-badge').innerHTML = `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
-  // Le mot n'est révélé qu'en fin de partie — pendant la partie, seul l'homme invisible est identifié
+  document.getElementById('elim-icon').textContent = '💀';
+  document.getElementById('elim-title').textContent = player.role === 'mrwhite' ? 'L\'homme invisible est éliminé !' : 'Éliminé·e !';
+  // On ne révèle le rôle que pour l'homme invisible — les autres restent mystérieux
+  if (player.role === 'mrwhite') {
+    document.getElementById('elim-role-badge').innerHTML = `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
+  } else {
+    document.getElementById('elim-role-badge').innerHTML = '';
+  }
   document.getElementById('elim-word').textContent = '';
 
   if (player.role === 'mrwhite') {
@@ -2198,6 +2216,11 @@ window.showScreen = function(id) {
     updateCountButtons();
     const rc = document.getElementById('roles-card');
     if (rc) rc.style.display = state.players.length >= 3 ? '' : 'none';
+    // Restaurer le cadre Mots et son état
+    const wc = document.getElementById('words-card');
+    if (wc) wc.style.display = '';
+    state.wordsConfirmed = false;
+    toggleWordMode();
   }
 };
 
