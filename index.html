@@ -646,7 +646,7 @@
     <div class="app-header">
       <div>
         <h1 style="white-space:nowrap;background:linear-gradient(90deg,#ff4e50,#fc913a,#f9d423,#2ecc71,#1abc9c,#3498db,#9b59b6,#e91e8c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Imposteurs&nbsp;!</h1>
-        <div class="subtitle">Jeu de déduction sociale</div>
+        <div class="subtitle">Jeu de déduction sociale - Sébastien Dumortier</div>
       </div>
     </div>
 
@@ -1155,7 +1155,225 @@ const WORD_PAIRS = [
   ["slalom","descente"],["curling","hockey sur glace"],["padel","squash"],
   ["judo","karaté"],["sumo","lutte"],["kung-fu","boxe"],
   ["belote","tarot"],["uno","cartes"],
+
+  // 100 nouvelles paires — vocabulaire d'un enfant de 12 ans
+  // Animaux
+  ["mouton","agneau"],["renard","blaireau"],["pieuvre","calmar"],["corbeau","pie"],
+  ["âne","mulet"],["baleine","orque"],["marmotte","écureuil"],["paon","faisan"],
+  ["poulain","veau"],["taupe","souris"],
+
+  // Nourriture / cuisine
+  ["pancake","gaufre"],["nuggets","cordon bleu"],["soupe","velouté"],["confiture","gelée"],
+  ["beurre de cacahuète","nutella"],["limonade","grenadine"],["bonbon","chewing-gum"],
+  ["chips","pop-corn"],["cookie","brownie"],["donut","beignet"],
+
+  // École
+  ["punition","colle"],["récré","pause"],["cantine","self"],["cartable","sac à dos"],
+  ["interrogation","contrôle"],["bulletin","carnet de notes"],["TPE","exposé"],
+  ["cours","TD"],["absence","retard"],["permanence","étude"],
+
+  // Sport
+  ["penalty","coup franc"],["corner","touche"],["carton rouge","carton jaune"],
+  ["gardien","défenseur"],["arbitre","juge de ligne"],["championnat","coupe"],
+  ["entraînement","match"],["vestiaire","terrain"],["maillot","short"],["tribune","gradin"],
+
+  // Technologie / numérique
+  ["notification","alerte"],["écran tactile","clavier"],["selfie","photo"],
+  ["retweet","partage"],["abonnement","follow"],["téléchargement","streaming"],
+  ["batterie","chargeur"],["mise à jour","installation"],["pseudo","nom d'utilisateur"],
+  ["emoji","sticker"],
+
+  // Nature / météo
+  ["orage","averse"],["verglas","gel"],["branche","tronc"],["racine","écorce"],
+  ["falaise","ravin"],["marée haute","marée basse"],["coucher de soleil","lever de soleil"],
+  ["forêt","bois"],["ruisseau","torrent"],["dune","colline"],
+
+  // Maison / quotidien
+  ["douche","bain"],["réveil","alarme"],["aspirateur","balai"],
+  ["poubelle","bac de recyclage"],["clé","badge"],["volet","rideau"],
+  ["congélateur","réfrigérateur"],["lave-vaisselle","éponge"],["couloir","entrée"],["grenier","cave"],
+
+  // Corps / santé
+  ["genou","coude"],["poignet","cheville"],["rhume","grippe"],["fièvre","frisson"],
+  ["pansement","sparadrap"],["fracture","entorse"],["sirop","comprimé"],
+  ["opération","chirurgie"],["infirmière","aide-soignant"],["urgences","cabinet médical"],
+
+  // Émotions / caractère
+  ["timide","introverti"],["bavard","extraverti"],["jaloux","envieux"],
+  ["généreux","altruiste"],["têtu","obstiné"],["flemmard","paresseux"],
+  ["maladroit","gauche"],["rigolo","comique"],["stressé","anxieux"],["fier","vaniteux"],
+
+  // Loisirs / culture pop
+  ["manga","comics"],["cosplay","déguisement"],["escape game","chasse au trésor"],
+  ["karaoké","playback"],["graffiti","street art"],["skate","trottinette"],
+  ["youtuber","streamer"],["fan","supporter"],["concert","festival"],["clip","court-métrage"],
+
+  // 100 nouvelles paires — vocabulaire d’un enfant de 10 ans
+  // Animaux familiers
+  ["chaton","chiot"],["perruche","canari"],["cochon d’Inde","lapin"],["tortue","escargot"],
+  ["poussin","caneton"],["ourson","lionceau"],["louveteau","renardeau"],
+
+  // Animaux sauvages simples
+  ["éléphant","girafe"],["singe","gorille"],["zèbre","cheval sauvage"],["pingouin","ours polaire"],
+  ["crocodile","alligator"],["grenouille","crapaud"],["aigle","hibou"],
+
+  // Nourriture simple
+  ["frite","chips"],["ketchup","mayonnaise"],["tartine","toast"],["yaourt","fromage blanc"],
+  ["compote","confiture"],["jus de pomme","jus d’orange"],["lait","chocolat chaud"],
+  ["riz","pâtes"],["salade","épinards"],["fraise","cerise"],
+
+  // Jouets et jeux
+  ["poupée","nounours"],["voiture télécommandée","train électrique"],
+  ["puzzle","memory"],["ballon","frisbee"],["toupie","yoyo"],["bille","osselets"],
+  ["jeu de société","jeu de cartes"],["cerf-volant","boomerang"],["trampoline","toboggan"],
+
+  // École primaire
+  ["maîtresse","instituteur"],["tableau","ardoise"],["crayon","feutre"],["gomme","correcteur"],
+  ["colle","scotch"],["règle","équerre"],["récréation","pause déjeuner"],
+  ["devoir","leçon"],["dictée","rédaction"],
+
+  // Maison et famille
+  ["maman","papa"],["grand-mère","grand-père"],["cousin","cousine"],["oncle","tante"],
+  ["chambre","salon"],["cuisine","salle à manger"],["jardin","terrasse"],
+  ["doudou","peluche"],["lit","canapé"],["baignoire","douche"],
+
+  // Nature simple
+  ["soleil","nuage"],["pluie","neige"],["fleur","herbe"],["arbre","buisson"],
+  ["rivière","lac"],["montagne","colline"],["plage","forêt"],["caillou","sable"],
+
+  // Corps
+  ["dent","gencive"],["doigt","orteil"],["ventre","dos"],
+  ["nez","oreille"],["sourcil","cil"],["joue","menton"],["épaule","hanche"],
+
+  // Émotions simples
+  ["content","triste"],["surpris","effrayé"],["en colère","calme"],["jaloux","fier"],
+  ["fatigué","reposé"],["timide","courageux"],["impatient","patient"],["joyeux","maussade"],
+
+  // Héros et univers enfants
+  ["sorcier","chevalier"],["fée","princesse"],["dragon","licorne"],["pirate","ninja"],
+  ["superhéros","vilain"],["robot","extraterrestre"],["fantôme","zombie"],
+
+  // Divers quotidien
+  ["vélo","trottinette"],["piscine","parc"],["anniversaire","fête"],["cadeau","surprise"],
+  ["chanson","comptine"],["dessin animé","film"],["bibliothèque","librairie"],
+  ["médecin","dentiste"],["bus scolaire","voiture"],["vacances","week-end"],
+
+  // 100 paires supplémentaires — 10 ans
+  // Fruits
+  ["pomme","poire"],["banane","kiwi"],["raisin","cerise"],["pêche","abricot"],
+  ["citron","orange"],["ananas","mangue"],["pastèque","melon"],
+
+  // Légumes
+  ["carotte","radis"],["tomate","concombre"],["haricot vert","petit pois"],
+  ["maïs","brocoli"],["champignon","oignon"],["patate douce","pomme de terre"],
+
+  // Animaux de la ferme
+  ["vache","chèvre"],["cochon","mouton"],["poule","canard"],["cheval","poney"],
+  ["lapin","cobaye"],["âne","boeuf"],["dinde","oie"],
+
+  // Insectes et petites bêtes
+  ["papillon","libellule"],["coccinelle","abeille"],["fourmi","ver de terre"],
+  ["escargot","limace"],["araignée","mille-pattes"],["grillon","cigale"],
+
+  // Couleurs et formes
+  ["rouge","orange"],["bleu","violet"],["vert","jaune"],["rose","bordeaux"],
+  ["rond","ovale"],["carré","rectangle"],["triangle","étoile"],["coeur","losange"],
+
+  // Vêtements simples
+  ["pull","gilet"],["chaussette","collant"],["pyjama","jogging"],
+  ["imperméable","anorak"],["casquette","bonnet"],["tong","sandale"],
+  ["tablier","blouse"],
+
+  // Sports simples
+  ["course","saut"],["natation","plongée"],["foot","rugby"],["tennis","badminton"],
+  ["ski","luge"],["vélo","roller"],["danse","gym"],["judo","karaté"],
+
+  // Musique
+  ["guitare","piano"],["tambour","maracas"],["flûte","trompette"],
+  ["chanson","rap"],["musique","danse"],
+
+  // Transports simples
+  ["voiture","camion"],["moto","scooter"],["bateau","canoë"],
+  ["avion","hélicoptère"],["vélo","trottinette électrique"],["bus","tramway"],
+  ["train","métro"],
+
+  // Météo et nature
+  ["arc-en-ciel","éclair"],["tonnerre","vent"],["tempête","ouragan"],
+  ["printemps","automne"],["feuille","brindille"],["gland","châtaigne"],
+  ["flocon","grêlon"],
+
+  // Lieux simples
+  ["école","collège"],["supermarché","épicerie"],["cinema","théâtre"],
+  ["parc","jardin public"],["piscine","lac"],["forêt","bois"],
+  ["musée","bibliothèque"],
+
+  // Magie et contes
+  ["magicien","sorcier"],["baguette magique","chapeau"],["château","tour"],
+  ["prince","roi"],["princesse","reine"],["dragon","ogre"],
+  ["fée","lutin"],["génie","djinn"],
+
+  // Jeux de plein air
+  ["cache-cache","loup"],["tag","éperviers"],["marelle","élastique"],
+  ["corde à sauter","hula hoop"],["billes","toupie"],
+
+  // Sens et perceptions
+  ["chaud","brûlant"],["froid","glacé"],["doux","rugueux"],
+  ["sucré","salé"],["fort","faible"],["grand","énorme"],["petit","minuscule"],
+  // 100 nouvelles paires — enfant de 10 ans
+  // Instruments de musique
+  ["violon","guitare"],["piano","orgue"],["trompette","trombonne"],["tambour","djembé"],
+  ["flûte","harmonica"],["accordéon","cornemuse"],["contrebasse","violoncelle"],
+
+  // Planètes et espace
+  ["Lune","Soleil"],["Mars","Vénus"],["Jupiter","Saturne"],["étoile","planète"],
+  ["comète","météorite"],["astronaute","cosmonaute"],["fusée","navette"],
+
+  // Matières scolaires
+  ["maths","géométrie"],["français","lecture"],["histoire","géographie"],
+  ["sciences","biologie"],["sport","EPS"],["dessin","arts plastiques"],["musique","chorale"],
+
+  // Outils simples
+  ["marteau","clou"],["tournevis","vis"],["pinceau","brosse"],["arrosoir","tuyau"],
+  ["râteau","pelle"],["ciseaux","cutterr"],["colle","ruban"],
+
+  // Animaux marins
+  ["poisson rouge","poisson clown"],["dauphin","requin"],["pieuvre","méduse"],
+  ["crabe","homard"],["étoile de mer","oursin"],["baleine","orque"],["hippocampe","raie"],
+
+  // Magie et contes
+  ["sorcière","magicien"],["baguette","chapeau magique"],["potion","élixir"],
+  ["tapis volant","balai"],["miroir magique","boule de cristal"],["sort","malédiction"],
+
+  // Professions simples
+  ["pompier","policier"],["médecin","infirmier"],["boulanger","pâtissier"],
+  ["facteur","livreur"],["jardinier","agriculteur"],["cuisinier","serveur"],
+  ["maçon","plombier"],
+
+  // Meubles et maison
+  ["armoire","commode"],["étagère","bibliothèque"],["bureau","table de travail"],
+  ["tabouret","pouf"],["lampe","lustre"],["tapis","moquette"],["rideau","volet"],
+
+  // Chiffres et mathématiques simples
+  ["addition","soustraction"],["multiplication","division"],["carré","rectangle"],
+  ["cercle","triangle"],["moitié","quart"],["pair","impair"],["chiffre","nombre"],
+
+  // Céréales et petits-déjeuners
+  ["céréales","granola"],["pain grillé","tartine"],["beurre","confiture"],
+  ["lait","jus de fruit"],["miel","sirop d'érable"],["oeuf","omelette"],
+
+  // Activités artistiques
+  ["peinture","dessin"],["sculpture","modelage"],["origami","découpage"],
+  ["photographie","illustration"],["broderie","tricot"],
+
+  // Mots opposés simples
+  ["jour","nuit"],["été","hiver"],["montée","descente"],["entrée","sortie"],
+  ["début","fin"],["question","réponse"],["problème","solution"],["ami","ennemi"],
+
+  // Lieux de vacances
+  ["plage","montagne"],["camping","hôtel"],["village","ville"],["campagne","mer"],
+  ["piscine","lac"],["parc d'attractions","zoo"],
 ];
+
 
 // ═══════════════════════════════════════════════════════════════
 //  STATE
