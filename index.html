@@ -18,6 +18,7 @@
     --citizen: #2ecc71;
     --undercover: #9b59b6;
     --mrwhite: #3498db;
+    --oracle: #e67e22;
     --text: #e8e6e0;
     --muted: #888880;
     --radius: 12px;
@@ -282,7 +283,7 @@
 
   .secret-word {
     font-family: 'Playfair Display', serif;
-    font-size: 2.2rem;
+    font-size: clamp(1.2rem, 6vw, 2.2rem);
     font-weight: 700;
     color: var(--text);
     letter-spacing: 1px;
@@ -302,6 +303,7 @@
   .badge-citizen { background: rgba(46,204,113,0.15); color: var(--citizen); border: 1px solid rgba(46,204,113,0.3); }
   .badge-undercover { background: rgba(155,89,182,0.15); color: var(--undercover); border: 1px solid rgba(155,89,182,0.3); }
   .badge-mrwhite { background: rgba(52,152,219,0.15); color: var(--mrwhite); border: 1px solid rgba(52,152,219,0.3); }
+  .badge-oracle { background: rgba(230,126,34,0.15); color: var(--oracle); border: 1px solid rgba(230,126,34,0.3); }
 
   .tap-hint {
     font-size: 0.75rem;
@@ -571,6 +573,15 @@
     margin: 16px 0;
   }
 
+  /* ─── Oracle reveal ─── */
+  .oracle-prompt {
+    background: rgba(230,126,34,0.08);
+    border: 1px solid rgba(230,126,34,0.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+  }
+
   /* ─── Scores table ─── */
   .score-item {
     display: flex;
@@ -656,6 +667,7 @@
         <p>🎭 Chaque joueur reçoit un mot secret. La majorité partage le même mot (citoyens). Un ou deux joueurs ont un mot <em>proche mais différent</em> (agent secret). Parfois, un joueur ne reçoit <em>aucun mot</em> (homme invisible).</p>
         <p>💬 À chaque tour, chacun donne un indice d'un mot. Puis on vote pour éliminer un suspect.</p>
         <p>🏆 Les citoyens gagnent en éliminant tous les imposteurs. Les agents secrets gagnent s'ils survivent en minorité. L'homme invisible gagne s'il est éliminé mais devine le mot des citoyens.</p>
+        <p>🔮 <strong style="color:var(--oracle)">Oracle</strong> <em>(optionnel, 10+ joueurs)</em> — Connaît les deux mots mais ignore lequel appartient aux citoyens. Il joue comme un citoyen pour aider l'homme invisible sans se faire remarquer. Il gagne avec l'homme invisible, mais <strong>ne peut pas l'aider</strong> quand celui-ci doit deviner le mot. Si l'homme invisible est éliminé, l'oracle l'est aussi automatiquement.</p>
       </div>
     </div>
 
@@ -723,6 +735,25 @@
             <span id="mw-val">0</span> homme<span id="mw-plural"></span> invisible<span id="mw-plural2"></span>
           </span>
           <button class="btn btn-sm" id="mw-plus" onclick="changeCount('mw',+1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">+</button>
+        </div>
+      </div>
+
+      <div id="oracle-row" style="display:none">
+        <hr class="divider">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label" style="color:var(--oracle)">🔮 Oracle</div>
+            <div class="toggle-desc">Connaît les deux mots, aide l'homme invisible</div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <button class="btn btn-sm" id="oracle-minus" onclick="changeCount('oracle',-1)" style="width:36px;flex-shrink:0;background:var(--surface);color:var(--muted);border:none">−</button>
+            <span style="font-size:0.85rem;color:var(--muted);flex:1;text-align:center">
+              <span id="oracle-val">0</span> oracle
+            </span>
+            <button class="btn btn-sm" id="oracle-plus" onclick="changeCount('oracle',+1)" style="width:36px;flex-shrink:0;background:var(--oracle);color:#fff;border:none">+</button>
+          </div>
         </div>
       </div>
     </div>
@@ -860,6 +891,9 @@
       <div class="mrwhite-prompt">
         <h3>L'homme invisible devine !</h3>
         <p class="mt8">L'homme invisible a été éliminé. Il peut encore gagner en devinant le mot des citoyens.</p>
+        <div id="oracle-cannot-help" class="mt8" style="display:none;padding:10px;background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.3);border-radius:8px;font-size:0.8rem;color:var(--oracle)">
+          🔮 L'Oracle a l'interdiction d'aider à cette étape.
+        </div>
         <div class="field mt16">
           <label>Quel est le mot des citoyens ?</label>
           <input type="text" id="mrwhite-guess-input" placeholder="Votre réponse…">
@@ -1385,6 +1419,7 @@ let state = {
   undercoverCount: 1,
   hasMrWhite: false,
   mrwhiteCount: 0,
+  hasOracle: false,
   round: 1,
   revealIndex: 0,
   wordRevealed: false,
@@ -1455,6 +1490,7 @@ function updateCountButtons() {
   const n = state.players.length;
   const uc = parseInt(document.getElementById('uc-val').textContent) || 1;
   const mw = parseInt(document.getElementById('mw-val').textContent) || 0;
+  const oracle = parseInt(document.getElementById('oracle-val').textContent) || 0;
 
   // UC: min 1, max such that uc + mw < n-1
   // Citizens must be strictly majority: impostors < n/2
@@ -1481,6 +1517,28 @@ function updateCountButtons() {
   mwPlus.style.color = mw >= mwMax ? 'var(--muted)' : '#000';
   document.getElementById('mw-plural').textContent = mw > 1 ? 's' : '';
   document.getElementById('mw-plural2').textContent = mw > 1 ? 's' : '';
+
+  // Oracle: only available if n >= 10 and at least 1 mrwhite
+  const oracleRow = document.getElementById('oracle-row');
+  if (oracleRow) {
+    const oracleVisible = n >= 10;
+    oracleRow.style.display = oracleVisible ? '' : 'none';
+    if (!oracleVisible && oracle > 0) {
+      document.getElementById('oracle-val').textContent = 0;
+    }
+    const oracleMinus = document.getElementById('oracle-minus');
+    const oraclePlus = document.getElementById('oracle-plus');
+    if (oracleMinus && oraclePlus) {
+      const oracleVal = parseInt(document.getElementById('oracle-val').textContent) || 0;
+      oracleMinus.disabled = oracleVal <= 0;
+      oraclePlus.disabled = oracleVal >= 1;
+      oracleMinus.style.background = oracleVal <= 0 ? 'var(--surface)' : 'var(--oracle)';
+      oracleMinus.style.color = oracleVal <= 0 ? 'var(--muted)' : '#fff';
+      oraclePlus.style.background = oracleVal >= 1 ? 'var(--surface)' : 'var(--oracle)';
+      oraclePlus.style.color = oracleVal >= 1 ? 'var(--muted)' : '#fff';
+    }
+  }
+
   // Global max label
   const lbl = document.getElementById('max-impostors-label');
   if (lbl) lbl.textContent = maxImpostors + ' imposteur' + (maxImpostors > 1 ? 's' : '') + ' au maximum';
@@ -1489,6 +1547,8 @@ function updateCountButtons() {
 function changeCount(type, delta) {
   const valEl = document.getElementById(type + '-val');
   let v = parseInt(valEl.textContent) + delta;
+  // Oracle: clamp 0-1
+  if (type === 'oracle') v = Math.max(0, Math.min(1, v));
   valEl.textContent = v;
   updateCountButtons();
 }
@@ -1525,6 +1585,9 @@ function renderPlayersList() {
     // Set defaults when player count changes
     ucEl.textContent = defUC;
     mwEl.textContent = defMW;
+    // Reset oracle if below threshold
+    const oracleEl = document.getElementById('oracle-val');
+    if (oracleEl && n < 10) oracleEl.textContent = 0;
     updateCountButtons();
   }
 }
@@ -1557,12 +1620,15 @@ function startGame() {
 
   const ucCount = parseInt(document.getElementById('uc-val').textContent) || 1;
   const mwCount = parseInt(document.getElementById('mw-val').textContent) || 0;
+  const oracleCount = n >= 10 ? (parseInt(document.getElementById('oracle-val').textContent) || 0) : 0;
   const hasMrWhite = mwCount > 0;
+  const hasOracle = oracleCount > 0;
   if (ucCount < 1) { notify('Il faut au moins 1 agent secret !'); return; }
 
   state.undercoverCount = ucCount;
   state.mrwhiteCount = mwCount;
   state.hasMrWhite = hasMrWhite;
+  state.hasOracle = hasOracle;
 
   // Check enough citizens remain
   const impostors = ucCount + mwCount;
@@ -1614,6 +1680,8 @@ function startGame() {
   for (let i = 0; i < state.undercoverCount; i++) roleAssignment[i] = 'undercover';
   // Assign homme(s) invisible(s)
   for (let i = 0; i < mwCount; i++) roleAssignment[state.undercoverCount + i] = 'mrwhite';
+  // Assign oracle (takes a citizen slot)
+  if (hasOracle) roleAssignment[state.undercoverCount + mwCount] = 'oracle';
 
   // Map to shuffled players
   state.players.forEach((p, i) => {
@@ -1622,6 +1690,7 @@ function startGame() {
     p.eliminated = false;
     p.word = role === 'citizen' ? state.citizenWord
            : role === 'undercover' ? state.undercoverWord
+           : role === 'oracle' ? state.citizenWord  // oracle gets citizenWord as display placeholder; reveal handles both
            : '???';
   });
 
@@ -1664,14 +1733,24 @@ function revealWord() {
 
   document.getElementById('word-hidden').style.display = 'none';
   document.getElementById('word-revealed').style.display = '';
-  document.getElementById('secret-word-text').textContent =
-    player.role === 'mrwhite' ? '— Aucun mot —' : player.word;
 
-  // Seul l'homme invisible voit son rôle affiché — citoyens et agents secrets voient juste leur mot
   const badgeContainer = document.getElementById('role-badge-container');
-  badgeContainer.innerHTML = player.role === 'mrwhite'
-    ? `<span class="role-badge badge-mrwhite">👁️ Homme invisible — tu n'as aucun mot !</span>`
-    : '';
+
+  if (player.role === 'oracle') {
+    // Show both words in random order without labelling which is which
+    const words = Math.random() < 0.5
+      ? [state.citizenWord, state.undercoverWord]
+      : [state.undercoverWord, state.citizenWord];
+    document.getElementById('secret-word-text').innerHTML =
+      `<span style="color:var(--oracle)">${words[0]}</span> <span style="color:var(--muted);font-size:1rem">/</span> <span style="color:var(--oracle)">${words[1]}</span>`;
+    badgeContainer.innerHTML = `<span class="role-badge badge-oracle">🔮 Oracle — tu connais les deux mots, mais tu ignores lequel appartient aux citoyens.</span>`;
+  } else if (player.role === 'mrwhite') {
+    document.getElementById('secret-word-text').textContent = '— Aucun mot —';
+    badgeContainer.innerHTML = `<span class="role-badge badge-mrwhite">👁️ Homme invisible — tu n'as aucun mot !</span>`;
+  } else {
+    document.getElementById('secret-word-text').textContent = player.word;
+    badgeContainer.innerHTML = '';
+  }
 
   const box = document.getElementById('word-box');
   box.className = 'word-box revealed';
@@ -1884,25 +1963,40 @@ function eliminatePlayer(name) {
     badgeClass = 'badge-citizen'; badgeText = '👤 Citoyen'; icon = '😱';
   } else if (player.role === 'undercover') {
     badgeClass = 'badge-undercover'; badgeText = '🕵️ Agent secret'; icon = '🎉';
+  } else if (player.role === 'oracle') {
+    badgeClass = 'badge-oracle'; badgeText = '🔮 Oracle'; icon = '🔮';
   } else {
     badgeClass = 'badge-mrwhite'; badgeText = "👁️ Homme invisible"; icon = '🤫';
   }
 
   document.getElementById('elim-icon').textContent = icon;
-  document.getElementById('elim-title').textContent = player.role === 'citizen' ? 'Un innocent éliminé !' : 'Imposteur démasqué !';
+  document.getElementById('elim-title').textContent = player.role === 'citizen' ? 'Un innocent éliminé !' : player.role === 'oracle' ? 'L\'Oracle est démasqué !' : 'Imposteur démasqué !';
   document.getElementById('elim-role-badge').innerHTML = `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
   // Le mot n'est révélé qu'en fin de partie — pendant la partie, seul l'homme invisible est identifié
   document.getElementById('elim-word').textContent = '';
 
   if (player.role === 'mrwhite') {
+    // Auto-eliminate oracle if present and alive
+    if (state.hasOracle) {
+      const oracle = state.players.find(p => p.role === 'oracle' && !p.eliminated);
+      if (oracle) {
+        oracle.eliminated = true;
+        // Append oracle elimination notice
+        document.getElementById('elim-word').textContent = '🔮 L\'Oracle est automatiquement éliminé.';
+      }
+    }
     document.getElementById('mrwhite-guess-section').style.display = '';
     document.getElementById('elim-continue-section').style.display = 'none';
+    // Show oracle cannot help notice
+    const oracleNotice = document.getElementById('oracle-cannot-help');
+    if (oracleNotice) oracleNotice.style.display = state.hasOracle ? '' : 'none';
   }
 
   showScreen('screen-elimination');
 
   // Check win condition after mr white is handled separately
   if (player.role !== 'mrwhite') {
+    // If oracle was just voted out, that's fine - check win condition normally
     checkWinCondition();
   }
 }
@@ -1921,6 +2015,12 @@ function judgeMrWhite() {
     document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
     document.getElementById('elim-continue-btn').onclick = () => endGame('mrwhite');
     addScore(mrWhite.name);
+    // Oracle also wins if it was alive before auto-elimination
+    // (oracle is already auto-eliminated but still credited)
+    if (state.hasOracle) {
+      const oracle = state.players.find(p => p.role === 'oracle');
+      if (oracle) addScore(oracle.name);
+    }
   } else {
     notify("Mauvaise réponse !", 2500);
     document.getElementById('mrwhite-guess-section').style.display = 'none';
@@ -1932,7 +2032,7 @@ function judgeMrWhite() {
 function checkWinCondition(afterMrWhite = false) {
   const alive = alivePlayers();
   const aliveUndercover = alive.filter(p => p.role === 'undercover');
-  const aliveCitizens = alive.filter(p => p.role === 'citizen');
+  const aliveCitizens = alive.filter(p => p.role === 'citizen' || p.role === 'oracle');
   const aliveMrWhite = alive.filter(p => p.role === 'mrwhite');
   const aliveImpostors = aliveUndercover.length + aliveMrWhite.length;
 
@@ -1942,7 +2042,7 @@ function checkWinCondition(afterMrWhite = false) {
     document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">🏛️</span><br><strong style="color:var(--citizen)">Les Citoyens gagnent !</strong>`;
     document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
     document.getElementById('elim-continue-btn').onclick = () => endGame('citizens');
-    aliveCitizens.forEach(p => addScore(p.name));
+    alive.filter(p => p.role === 'citizen').forEach(p => addScore(p.name));
     return;
   }
 
@@ -1995,6 +2095,7 @@ function endGame(winner) {
     let badgeClass = '', badgeText = '';
     if (p.role === 'citizen') { badgeClass = 'badge-citizen'; badgeText = '👤 Citoyen'; }
     else if (p.role === 'undercover') { badgeClass = 'badge-undercover'; badgeText = '🕵️ Agent secret'; }
+    else if (p.role === 'oracle') { badgeClass = 'badge-oracle'; badgeText = '🔮 Oracle'; }
     else { badgeClass = 'badge-mrwhite'; badgeText = "👁️ Homme invisible"; }
 
     const div = document.createElement('div');
@@ -2004,7 +2105,7 @@ function endGame(winner) {
         <div style="font-size:0.9rem;${p.eliminated ? 'text-decoration:line-through;opacity:0.5' : ''}">${p.name}</div>
         <span class="role-badge ${badgeClass}" style="margin-top:4px;display:inline-block">${badgeText}</span>
       </div>
-      <div style="font-size:0.8rem;color:var(--muted)">${p.role === 'mrwhite' ? '—' : p.word}</div>
+      <div style="font-size:0.8rem;color:var(--muted)">${p.role === 'mrwhite' ? '—' : p.role === 'oracle' ? `${state.citizenWord} / ${state.undercoverWord}` : p.word}</div>
     `;
     revealList.appendChild(div);
   });
