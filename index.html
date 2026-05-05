@@ -963,13 +963,13 @@ const WORD_PAIRS = [
   ["chat","tigre"],["chien","loup"],["lion","panthère"],["éléphant","rhinocéros"],
   ["dauphin","baleine"],["aigle","faucon"],["grenouille","crapaud"],["lapin","lièvre"],
   ["cheval","âne"],["cochon","sanglier"],["mouton","chèvre"],["vache","bison"],
-  ["perroquet","corbeau"],["hibou","chouette"],["requin","dauphin"],["crabe","homard"],
-  ["serpent","lézard"],["crocodile","alligator"],["guépard","léopard"],["ours","gorille"],
+  ["perroquet","corbeau"],["hibou","chouette"],["crabe","homard"],
+  ["serpent","lézard"],["crocodile","caïman"],["guépard","léopard"],["ours","gorille"],
   ["moustique","mouche"],["abeille","guêpe"],["papillon","libellule"],["fourmi","termite"],
   ["pingouin","manchot"],["poulpe","méduse"],["tortue","iguane"],
   ["renard","loup"],["girafe","chameau"],["zèbre","cheval"],["hippopotame","rhinocéros"],["panda","koala"],
   ["saumon","truite"],["canard","oie"],["poule","dindon"],["pigeon","tourterelle"],["moineau","mésange"],
-  ["escargot","limace"],["hérisson","hamster"],["araignée","scorpion"],["coccinelle","scarabée"],
+  ["serpent","limace"],["hérisson","hamster"],["araignée","scorpion"],["coccinelle","scarabée"],
   ["grillon","sauterelle"],["bourdon","frelon"],["mouette","goéland"],["cigogne","héron"],
   ["paon","faisan"],["thon","sardine"],["oursin","étoile de mer"],["coquille Saint-Jacques","moule"],
   // Nourriture & boissons
@@ -1148,7 +1148,7 @@ const WORD_PAIRS = [
   ["carnaval","défilé"],["concert","festival"],["compétition","tournoi"],
   // Environnement
   ["pollution","déchets"],["recyclage","compostage"],["déforestation","incendie"],
-  ["éolienne","panneau solaire"],["vélo","voiture électrique"],
+  ["éolienne","panneau solaire"],["vélo","voiture"],
   ["biodiversité","espèce menacée"],["parc naturel","réserve naturelle"],
   // Maths & sciences scolaires
   ["addition","soustraction"],["multiplication","division"],["fraction","pourcentage"],
@@ -1190,7 +1190,7 @@ const WORD_PAIRS = [
   // 100 nouvelles paires — vocabulaire d'un enfant de 12 ans
   // Animaux
   ["mouton","agneau"],["renard","blaireau"],["pieuvre","calmar"],["corbeau","pie"],
-  ["âne","mulet"],["baleine","orque"],["marmotte","écureuil"],["paon","faisan"],
+  ["âne","mulet"],["baleine","orque"],["marmotte","écureuil"],["autruche","émeu"],
   ["poulain","veau"],["taupe","souris"],
 
   // Nourriture / cuisine
@@ -1251,7 +1251,7 @@ const WORD_PAIRS = [
   // Nourriture simple
   ["frite","chips"],["ketchup","mayonnaise"],["tartine","toast"],["yaourt","fromage blanc"],
   ["compote","confiture"],["jus de pomme","jus d’orange"],["lait","chocolat chaud"],
-  ["riz","pâtes"],["salade","épinards"],["fraise","cerise"],
+  ["spaghettis","pâtes"],["salade","épinards"],["fraise","cerise"],
 
   // Jouets et jeux
   ["poupée","nounours"],["voiture télécommandée","train électrique"],
@@ -1287,7 +1287,7 @@ const WORD_PAIRS = [
   // Divers quotidien
   ["vélo","trottinette"],["piscine","parc"],["anniversaire","fête"],["cadeau","surprise"],
   ["chanson","comptine"],["dessin animé","film"],["bibliothèque","librairie"],
-  ["médecin","dentiste"],["bus scolaire","voiture"],["vacances","week-end"],
+  ["médecin","dentiste"],["bus","voiture"],["vacances","week-end"],
 
   // 100 paires supplémentaires — 10 ans
   // Fruits
@@ -1304,7 +1304,7 @@ const WORD_PAIRS = [
 
   // Insectes et petites bêtes
   ["papillon","libellule"],["coccinelle","abeille"],["fourmi","ver de terre"],
-  ["escargot","limace"],["araignée","mille-pattes"],["grillon","cigale"],
+  ["boa","python"],["araignée","mille-pattes"],["grillon","cigale"],
 
   // Couleurs et formes
   ["rouge","orange"],["bleu","violet"],["vert","jaune"],["rose","bordeaux"],
@@ -1324,7 +1324,7 @@ const WORD_PAIRS = [
   ["chanson","rap"],["musique","danse"],
 
   // Transports simples
-  ["voiture","camion"],["moto","scooter"],["bateau","canoë"],
+  ["voiture","moto"],["moto","scooter"],["bateau","canoë"],
   ["avion","hélicoptère"],["vélo","trottinette électrique"],["bus","tramway"],
   ["train","métro"],
 
@@ -1369,7 +1369,7 @@ const WORD_PAIRS = [
 
   // Animaux marins
   ["poisson rouge","poisson clown"],["dauphin","requin"],["pieuvre","méduse"],
-  ["crabe","homard"],["étoile de mer","oursin"],["baleine","orque"],["hippocampe","raie"],
+  ["crabe","homard"],["étoile de mer","oursin"],["dauphin","orque"],["hippocampe","raie"],
 
   // Magie et contes
   ["sorcière","magicien"],["baguette","chapeau magique"],["potion","élixir"],
@@ -1422,7 +1422,7 @@ const WORD_PAIRS = [
   ["poupée","nounours"],["ballon","balle"],["vélo","trottinette"],["toboggan","balançoire"],
   ["bac à sable","piscine gonflable"],["kapla","légo"],["puzzle","dominos"],
   ["dés","cartes"],["marelle","corde à sauter"],["cerf-volant","frisbee"],
-  ["yoyo","diabolo"],["billes","osselets"],["dinette","déguisement"],["voiture télécommandée","drone"],
+  ["yoyo","diabolo"],["billes","osselets"],["dinette","déguisement"],["avion","drone"],
   ["figurine","marionnette"],["château de sable","bonhomme de neige"],
   ["saute-mouton","chat perché"],["cache-cache","loup"],["1,2,3 soleil","éperviers"],
 
@@ -1526,7 +1526,7 @@ const WORD_PAIRS = [
   ["loupe","jumelles"],["règle","équerre"],["balance","minuteur"],
 
   // Transports enfant
-  ["vélo","trottinette"],["voiture","camion"],["bus scolaire","minibus"],
+  ["vélo","trottinette"],["voiture","train"],["bus scolaire","minibus"],
   ["train","tramway"],["bateau","barque"],["avion","hélicoptère"],
   ["camion de pompier","ambulance"],["tracteur","pelleteuse"],["moto","scooter"],
   ["fusée","navette spatiale"],["sous-marin","plongeur"],["radeau","canoë"],
@@ -1552,7 +1552,7 @@ const WORD_PAIRS = [
   ["bougie","feu d'artifice"],["déguisement","costume"],["cadeau","surprise"],
 
   // Animaux marins & aquatiques
-  ["poisson","crabe"],["dauphin","otarie"],["phoque","morse"],["baleine","orque"],
+  ["poisson","crabe"],["dauphin","otarie"],["phoque","morse"],["baleine","éléphant"],
   ["méduse","étoile de mer"],["hippocampe","pieuvre"],["requin","raie"],
   ["grenouille","triton"],["canard","cygne"],["loutre","castor"],["héron","martin-pêcheur"],
 
