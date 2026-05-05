@@ -435,6 +435,16 @@
     text-align: center;
     padding: 32px 0;
   }
+  .result-header h2 {
+    white-space: nowrap;
+    font-size: clamp(1rem, 5vw, 2rem);
+    overflow: hidden;
+  }
+  .result-header p {
+    font-size: clamp(0.75rem, 3.5vw, 1rem);
+    white-space: nowrap;
+    overflow: hidden;
+  }
 
   .result-icon {
     font-size: 3.5rem;
@@ -676,27 +686,25 @@
       <ul class="players-list" id="players-list"></ul>
     </div>
 
-    <div class="card">
-      <h3>Rôles</h3>
-
-      <div class="toggle-row mt16">
-        <div>
-          <div class="toggle-label">Agent secret</div>
-          <div class="toggle-desc">Joueur(s) avec un mot différent</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="toggle-undercover" checked onchange="updateRoleToggles()">
-          <span class="toggle-slider"></span>
-        </label>
+    <div class="card" id="roles-card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h3>Rôles</h3>
+        <span id="max-impostors-label" style="font-size:0.75rem;color:var(--muted)"></span>
       </div>
 
-      <div id="undercover-count-row">
-        <div class="field">
-          <label>Nombre d'agents secrets</label>
-          <div class="range-row">
-            <input type="range" id="undercover-count" min="1" max="3" value="1" oninput="document.getElementById('uc-val').textContent=this.value">
-            <span class="range-val" id="uc-val">1</span>
-          </div>
+      <div class="mt16">
+        <div class="toggle-label">Agent secret</div>
+        <div class="toggle-desc">Joueur(s) avec un mot différent</div>
+        <input type="hidden" id="toggle-undercover" value="1">
+      </div>
+
+      <div id="undercover-count-row" class="mt16">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button class="btn btn-sm" id="uc-minus" onclick="changeCount('uc',-1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">−</button>
+          <span style="font-size:0.85rem;color:var(--muted);flex:1;text-align:center">
+            <span id="uc-val">1</span> agent secret<span id="uc-plural"></span>
+          </span>
+          <button class="btn btn-sm" id="uc-plus" onclick="changeCount('uc',+1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">+</button>
         </div>
       </div>
 
@@ -705,12 +713,17 @@
       <div class="toggle-row">
         <div>
           <div class="toggle-label">Homme invisible</div>
-          <div class="toggle-desc">Un joueur sans mot (risqué !)</div>
+          <div class="toggle-desc">Joueur(s) sans mot (risqué !)</div>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="toggle-mrwhite" onchange="updateRoleToggles()">
-          <span class="toggle-slider"></span>
-        </label>
+      </div>
+      <div class="mt8">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button class="btn btn-sm" id="mw-minus" onclick="changeCount('mw',-1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">−</button>
+          <span style="font-size:0.85rem;color:var(--muted);flex:1;text-align:center">
+            <span id="mw-val">0</span> homme<span id="mw-plural"></span> invisible<span id="mw-plural2"></span>
+          </span>
+          <button class="btn btn-sm" id="mw-plus" onclick="changeCount('mw',+1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">+</button>
+        </div>
       </div>
     </div>
 
@@ -874,18 +887,6 @@
     <div class="card card-accent">
       <h3>Révélation des rôles</h3>
       <div id="final-reveal-list" class="mt16"></div>
-    </div>
-
-    <div class="card mt16">
-      <h3>Mots de la partie</h3>
-      <div class="stat-row mt8">
-        <span>Citoyens</span>
-        <span class="stat-val" id="go-citizen-word">—</span>
-      </div>
-      <div class="stat-row" id="go-undercover-row">
-        <span>Agent secret</span>
-        <span class="stat-val" id="go-undercover-word">—</span>
-      </div>
     </div>
 
     <div class="inline-row mt24">
@@ -1165,6 +1166,7 @@ let state = {
   undercoverWord: '',
   undercoverCount: 1,
   hasMrWhite: false,
+  mrwhiteCount: 0,
   round: 1,
   revealIndex: 0,
   wordRevealed: false,
@@ -1222,9 +1224,59 @@ function notify(msg, duration = 2500) {
 // ═══════════════════════════════════════════════════════════════
 //  SETUP
 // ═══════════════════════════════════════════════════════════════
+function defaultCounts() {
+  const n = state.players.length;
+  // Default UC: 1 for 3-6, 2 for 7-10, 3 for 11+
+  const defUC = n >= 11 ? 3 : n >= 7 ? 2 : 1;
+  // Default MW: 0 for 3-4, 1 for 5-8, 2 for 9+
+  const defMW = n >= 9 ? 2 : n >= 5 ? 1 : 0;
+  return { defUC, defMW };
+}
+
+function updateCountButtons() {
+  const n = state.players.length;
+  const uc = parseInt(document.getElementById('uc-val').textContent) || 1;
+  const mw = parseInt(document.getElementById('mw-val').textContent) || 0;
+
+  // UC: min 1, max such that uc + mw < n-1
+  // Citizens must be strictly majority: impostors < n/2
+  const maxImpostors = Math.floor((n - 1) / 2);
+  const ucMax = Math.max(1, maxImpostors - mw);
+  const ucMinus = document.getElementById('uc-minus');
+  const ucPlus = document.getElementById('uc-plus');
+  ucMinus.disabled = uc <= 1;
+  ucPlus.disabled = uc >= ucMax;
+  ucMinus.style.background = uc <= 1 ? 'var(--surface)' : 'var(--accent)';
+  ucMinus.style.color = uc <= 1 ? 'var(--muted)' : '#000';
+  ucPlus.style.background = uc >= ucMax ? 'var(--surface)' : 'var(--accent)';
+  ucPlus.style.color = uc >= ucMax ? 'var(--muted)' : '#000';
+  document.getElementById('uc-plural').textContent = uc > 1 ? 's' : '';
+  // MW: min 0, max 3 and total impostors <= floor((n-1)/2)
+  const mwMax = Math.min(3, Math.max(0, maxImpostors - uc));
+  const mwMinus = document.getElementById('mw-minus');
+  const mwPlus = document.getElementById('mw-plus');
+  mwMinus.disabled = mw <= 0;
+  mwPlus.disabled = mw >= mwMax;
+  mwMinus.style.background = mw <= 0 ? 'var(--surface)' : 'var(--accent)';
+  mwMinus.style.color = mw <= 0 ? 'var(--muted)' : '#000';
+  mwPlus.style.background = mw >= mwMax ? 'var(--surface)' : 'var(--accent)';
+  mwPlus.style.color = mw >= mwMax ? 'var(--muted)' : '#000';
+  document.getElementById('mw-plural').textContent = mw > 1 ? 's' : '';
+  document.getElementById('mw-plural2').textContent = mw > 1 ? 's' : '';
+  // Global max label
+  const lbl = document.getElementById('max-impostors-label');
+  if (lbl) lbl.textContent = maxImpostors + ' imposteur' + (maxImpostors > 1 ? 's' : '') + ' au maximum';
+}
+
+function changeCount(type, delta) {
+  const valEl = document.getElementById(type + '-val');
+  let v = parseInt(valEl.textContent) + delta;
+  valEl.textContent = v;
+  updateCountButtons();
+}
+
 function updateRoleToggles() {
-  const uc = document.getElementById('toggle-undercover').checked;
-  document.getElementById('undercover-count-row').style.display = uc ? '' : 'none';
+  updateCountButtons();
 }
 
 function toggleWordMode() {
@@ -1242,6 +1294,21 @@ function renderPlayersList() {
       <button class="remove-btn" onclick="removePlayer(${i})" title="Retirer">✕</button>`;
     ul.appendChild(li);
   });
+  // Show/hide roles card
+  const n = state.players.length;
+  const rolesCard = document.getElementById('roles-card');
+  if (rolesCard) rolesCard.style.display = n >= 3 ? '' : 'none';
+
+  // Recalculate defaults and clamp current values
+  const { defUC, defMW } = defaultCounts();
+  const ucEl = document.getElementById('uc-val');
+  const mwEl = document.getElementById('mw-val');
+  if (ucEl && mwEl) {
+    // Set defaults when player count changes
+    ucEl.textContent = defUC;
+    mwEl.textContent = defMW;
+    updateCountButtons();
+  }
 }
 
 function addPlayer() {
@@ -1270,16 +1337,18 @@ function startGame() {
   const n = state.players.length;
   if (n < 3) { notify('Il faut au moins 3 joueurs !'); return; }
 
-  const hasUndercover = document.getElementById('toggle-undercover').checked;
-  const hasMrWhite = document.getElementById('toggle-mrwhite').checked;
-  if (!hasUndercover && !hasMrWhite) { notify('Activez au moins un rôle imposteur !'); return; }
+  const ucCount = parseInt(document.getElementById('uc-val').textContent) || 1;
+  const mwCount = parseInt(document.getElementById('mw-val').textContent) || 0;
+  const hasMrWhite = mwCount > 0;
+  if (ucCount < 1) { notify('Il faut au moins 1 agent secret !'); return; }
 
-  state.undercoverCount = hasUndercover ? parseInt(document.getElementById('undercover-count').value) : 0;
+  state.undercoverCount = ucCount;
+  state.mrwhiteCount = mwCount;
   state.hasMrWhite = hasMrWhite;
 
   // Check enough citizens remain
-  const impostors = state.undercoverCount + (hasMrWhite ? 1 : 0);
-  if (impostors >= n - 1) { notify('Trop d\'imposteurs pour ce nombre de joueurs !'); return; }
+  const impostors = ucCount + mwCount;
+  if (impostors > Math.floor((n - 1) / 2)) { notify('Les citoyens doivent être majoritaires !'); return; }
 
   // Pick words
   const useRandom = document.getElementById('toggle-random-words').checked;
@@ -1325,8 +1394,8 @@ function startGame() {
   for (let i = 0; i < n; i++) roleAssignment.push('citizen');
   // Assign undercov­er
   for (let i = 0; i < state.undercoverCount; i++) roleAssignment[i] = 'undercover';
-  // Assign mr. white
-  if (hasMrWhite) roleAssignment[state.undercoverCount] = 'mrwhite';
+  // Assign homme(s) invisible(s)
+  for (let i = 0; i < mwCount; i++) roleAssignment[state.undercoverCount + i] = 'mrwhite';
 
   // Map to shuffled players
   state.players.forEach((p, i) => {
@@ -1691,22 +1760,15 @@ function endGame(winner) {
   const titles = { citizens: 'Victoire des Citoyens !', undercover: 'Les Agents secrets gagnent !', mrwhite: "L'homme invisible l'emporte !" };
   const subs = {
     citizens: 'Tous les imposteurs ont été démasqués.',
-    undercover: 'Les agents secrets ont su rester dans l\'ombre.',
-    mrwhite: 'Mr. White a deviné le mot des citoyens.',
+    undercover: 'Les agents secrets sont restés dans l\'ombre !',
+    mrwhite: "L'homme invisible a deviné le mot des citoyens.",
   };
 
   document.getElementById('go-icon').textContent = icons[winner];
   document.getElementById('go-title').textContent = titles[winner];
   document.getElementById('go-subtitle').textContent = subs[winner];
 
-  document.getElementById('go-citizen-word').textContent = state.citizenWord;
-  const ucRow = document.getElementById('go-undercover-row');
-  if (state.undercoverCount > 0) {
-    ucRow.style.display = '';
-    document.getElementById('go-undercover-word').textContent = state.undercoverWord;
-  } else {
-    ucRow.style.display = 'none';
-  }
+  // Words shown in reveal list already
 
   // Final reveal
   const revealList = document.getElementById('final-reveal-list');
@@ -1812,7 +1874,12 @@ const _showScreen = showScreen;
 window.showScreen = function(id) {
   _showScreen(id);
   if (id === 'screen-vote') renderVoteScreen();
-  if (id === 'screen-setup') updatePairsCount();
+  if (id === 'screen-setup') {
+    updatePairsCount();
+    updateCountButtons();
+    const rc = document.getElementById('roles-card');
+    if (rc) rc.style.display = state.players.length >= 3 ? '' : 'none';
+  }
 };
 
 // Init word pairs count
