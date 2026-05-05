@@ -977,7 +977,7 @@ const WORD_PAIRS = [
   ["crêpe","gaufre"],["croissant","brioche"],["baguette","pain de mie"],["fromage","yaourt"],
   ["chocolat","caramel"],["glace","sorbet"],["fraise","framboise"],
   ["pomme","poire"],["citron","orange"],["banane","mangue"],["carotte","navet"],
-  ["soupe","bouillon"],["sushi","maki"],["tacos","burrito"],
+  ["soupe","bouillon"],
   ["jus d'orange","limonade"],["eau","soda"],
   ["lasagnes","ravioli"],["risotto","paella"],["couscous","tajine"],
   ["fondue","raclette"],["quiche","pizza"],["tarte","gâteau"],["madeleine","biscuit"],
@@ -988,18 +988,18 @@ const WORD_PAIRS = [
   ["poivron","piment"],["courgette","aubergine"],["brocoli","chou-fleur"],["épinard","salade"],
   ["noisette","amande"],["pistache","cacahuète"],["noix","châtaigne"],
   ["miel","confiture"],["beurre","margarine"],["crème","lait"],
-  ["smoothie","milkshake"],["chocolat chaud","lait chaud"],
+  ["smoothie","milkshake"],["cappuccino","café"],
   // Sports & loisirs
   ["football","rugby"],["tennis","badminton"],["natation","plongeon"],["ski","snowboard"],
   ["boxe","judo"],["vélo","course à pied"],["golf","pétanque"],["échecs","dames"],
   ["randonnée","escalade"],["surf","skateboard"],["yoga","danse"],
   ["basketball","handball"],["volleyball","beach-volley"],["hockey","patinage"],
-  ["karaté","taekwondo"],["aviron","canoë-kayak"],
+  ["karaté","taekwondo"],
   ["luge","bobsleigh"],["équitation","cyclisme"],["plongée","natation"],
   ["pêche","chasse"],["jardinage","cuisine"],["dessin","aquarelle"],["photographie","vidéo"],
   ["jeu vidéo","jeu de société"],["puzzle","maquette"],
   // Transports
-  ["avion","hélicoptère"],["train","métro"],["voiture","camion"],["vélo","moto"],
+  ["avion","hélicoptère"],["train","métro"],["voiture","camion"],["mobylette","moto"],
   ["bateau","ferry"],["tram","bus"],["taxi","voiture"],["fusée","avion"],
   ["scooter","trottinette"],["kayak","canoë"],["montgolfière","parachute"],
   ["ambulance","camion de pompier"],["tracteur","voiture"],
@@ -1010,7 +1010,7 @@ const WORD_PAIRS = [
   ["clavier","souris"],["écran","projecteur"],["disque dur","clé USB"],
   ["Wi-Fi","Bluetooth"],["GPS","boussole"],["caméra","webcam"],["microphone","haut-parleur"],
   ["batterie","chargeur"],["câble","adaptateur"],["antenne","routeur"],
-  ["virus informatique","piratage"],["réalité virtuelle","réalité augmentée"],
+  ["virus informatique","piratage"],
   ["intelligence artificielle","robot"],["jeu vidéo","application"],
   // Culture & arts
   ["livre","magazine"],["film","série"],["guitare","basse"],["piano","orgue"],
@@ -1028,9 +1028,9 @@ const WORD_PAIRS = [
   ["cuisinier","boulanger"],["acteur","réalisateur"],["musicien","chanteur"],
   ["plombier","électricien"],["charpentier","maçon"],["menuisier","peintre en bâtiment"],
   ["coiffeur","esthéticienne"],["pharmacien","médecin"],["vétérinaire","éleveur"],
-  ["astronome","météorologue"],["géologue","géographe"],["psychologue","médecin"],
+  ["astronome","météorologue"],["psychologue","médecin"],
   ["styliste","couturier"],["bijoutier","horloger"],
-  ["archéologue","historien"],["sociologue","psychologue"],
+  ["archéologue","historien"],["psychiatre","psychologue"],
   // École, éducation & bureautique
   ["crayon","stylo"],["cahier","carnet"],["tableau","ardoise"],["collège","lycée"],
   ["bibliothèque","médiathèque"],["examen","contrôle"],["diplôme","brevet"],
@@ -1074,7 +1074,7 @@ const WORD_PAIRS = [
   ["espoir","illusion"],["courage","audace"],["patience","persévérance"],["jalousie","envie"],
   ["orgueil","arrogance"],["honte","gêne"],["nostalgie","ennui"],
   ["curiosité","étonnement"],["confiance","méfiance"],["générosité","égoïsme"],
-  ["liberté","indépendance"],["justice","équité"],["vérité","mensonge"],["beauté","laideur"],
+  ["liberté","indépendance"],["vérité","mensonge"],["beauté","laideur"],
   // Histoire & société
   ["roi","président"],["guerre","bataille"],["loi","règlement"],["révolution","révolte"],
   ["empire","royaume"],["élection","vote"],
@@ -1087,8 +1087,7 @@ const WORD_PAIRS = [
   ["bactérie","virus"],["vaccin","médicament"],["antibiotique","comprimé"],
   ["chirurgie","opération"],["radiographie","scanner"],
   ["allergie","rhume"],["épidémie","pandémie"],["immunité","résistance"],
-  ["gravité","magnétisme"],["lumière","son"],["optique","acoustique"],
-  ["photosynthèse","respiration"],["évolution","adaptation"],["migration","hibernation"],
+  ["gravité","magnétisme"],["lumière","son"],["optique","acoustique"],["évolution","adaptation"],["migration","hibernation"],
   // Mythologie & fantastique
   ["ange","démon"],["paradis","enfer"],["prière","méditation"],
   ["Zeus","Poséidon"],["Athéna","Artémis"],["Apollon","Hermès"],
@@ -1160,19 +1159,17 @@ const WORD_PAIRS = [
   ["orbite","trajectoire"],["télescope","jumelles"],["astronaute","cosmonaute"],
   ["stalactite","stalagmite"],["volcan","tremblement de terre"],
   // Langue française
-  ["métaphore","comparaison"],["ironie","sarcasme"],["monologue","dialogue"],
+  ["femme","épouse"],
+  ["dictateur","président"],["ironie","sarcasme"],["monologue","dialogue"],
   ["narrateur","auteur"],["introduction","conclusion"],
   ["sonnet","poème"],["fable","conte"],["épopée","légende"],
-  ["préfixe","suffixe"],["synonyme","antonyme"],["homonyme","paronyme"],
+  ["préfixe","suffixe"],["homonyme","synonyme"],
   ["argot","verlan"],["accent","dialecte"],["grammaire","orthographe"],
   // Jeux & loisirs jeunes
   ["yoyo","toupie"],["cerf-volant","frisbee"],["patin à roulettes","skateboard"],
   ["trampoline","balançoire"],["Lego","Playmobil"],["Monopoly","Risk"],
   ["Scrabble","Boggle"],["dominos","cartes"],["uno","bataille"],
   ["fléchettes","billard"],["babyfoot","ping-pong"],["pétanque","bowling"],
-  // Jeux vidéo (vocabulaire courant)
-  ["RPG","jeu d'aventure"],["FPS","jeu de tir"],["battle royale","jeu en ligne"],
-  ["simulation","jeu de gestion"],["jeu de plateforme","jeu d'action"],
   // Outils courants
   ["marteau","tournevis"],["perceuse","visseuse"],["scie","cutter"],
   ["pince","tenaille"],["aspirateur","balai"],["tuyau","robinet"],
@@ -1510,13 +1507,13 @@ const WORD_PAIRS = [
   ["Pinocchio","Gepetto"],["Dumbo","Bambi"],
 
   // Musique & sons
-  ["tambour","tambourin"],["flûte","pipeau"],["maracas","triangle"],["xylophone","marimba"],
-  ["cloche","sonnette"],["sifflet","trompette de jouet"],["guitare","ukulélé"],
+  ["tambour","tambourin"],["flûte","pipeau"],["maracas","triangle"],
+  ["cloche","sonnette"],["sifflet","trompette"],["guitare","violon"],
   ["chanson","comptine"],["mélodie","rythme"],["silence","bruit"],["doux","fort"],
-  ["aigu","grave"],["lent","rapide"],["clap","frapper des mains"],
+  ["aigu","grave"],["lent","rapide"],["film","bande-annonce"],
 
   // Sport & plein air enfant
-  ["vélo","draisienn"],["skate","trottinette"],["ballon de foot","ballon de basket"],
+  ["vélo","moto"],["skate","trottinette"],["ballon de foot","ballon de basket"],
   ["corde à sauter","élastique"],["natation","patinage"],["judo","karaté"],
   ["tennis","ping-pong"],["badminton","volant"],["toboggan","trampoline"],
   ["balançoire","tourniquet"],["course","saut"],["ramper","rouler"],["lancer","attraper"],
@@ -1570,21 +1567,20 @@ const WORD_PAIRS = [
 
   // Animaux de nuit
   ["hibou","chauve-souris"],["hérisson","renard"],["loup","coyote"],["chouette","grand-duc"],
-  ["luciole","ver luisant"],["grillon","crapaud"],["raton laveur","opposum"],
+  ["luciole","ver luisant"],["grillon","crapaud"],["raton laveur","castor"],
 
   // Magie & science enfant
   ["expérience","résultat"],["loupe","microscope"],["aimant","boussole"],
-  ["volcan de baking soda","arc-en-ciel de lumière"],["cristal","sable coloré"],
-  ["bulles de savon","nuage dans un bocal"],["slime","pâte à modeler"],
+  ["cristal","sable coloré"],
+  ["bulle","balle"],["magicien","mentaliste"],
 
   // Animaux préhistoriques
   ["dinosaure","mammouth"],["T-Rex","tricératops"],["ptérodactyle","diplodocus"],
-  ["ankylosaure","stégosaure"],["dent de sabre","mastodonte"],
 
   // Mots du quotidien enfant
   ["doudou","couverture"],["tétine","biberon"],["poussette","porte-bébé"],
-  ["hochet","mobile"],["parc","tapis d'éveil"],["veilleuse","mobile musical"],
-  ["siège auto","harnais"],["casque de vélo","genouillère"],
+  ["hochet","mobile"],["parc","tapis d'éveil"],["veilleuse","mobile"],
+  ["siège auto","harnais"],["casque","genouillère"],
   ["sac de couchage","tente"],["lampe de poche","frontale"],
 ];
 
