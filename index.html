@@ -2235,9 +2235,8 @@ function checkWinCondition(afterMrWhite = false) {
     return;
   }
 
-  // Imposteurs gagnent : ils sont strictement plus nombreux que les citoyens
-  // (la majorité leur est acquise, les citoyens ne peuvent plus l'emporter)
-  if (aliveImpostors >= aliveCitizens.length) {
+  // Imposteurs gagnent : il ne reste plus qu'un seul citoyen
+  if (aliveCitizens.length <= 1) {
     document.getElementById('game-status-msg').style.display = '';
     document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">🕵️</span><br><strong style="color:var(--undercover)">Les imposteurs gagnent !</strong>`;
     document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
