@@ -689,17 +689,15 @@
     <p class="mt8">Paramétrez la partie.</p>
 
     <div class="card mt24">
-      <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <h3>Joueurs</h3>
-        <span id="player-count" style="font-size:1.1rem;font-weight:500;color:var(--accent)"></span>
+      <h3>Nombre de joueurs</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px">
+        <button id="players-minus-btn" class="btn btn-sm" onclick="changePlayerCount(-1)"
+          style="width:52px;height:52px;flex-shrink:0;font-size:1.4rem;background:var(--accent);color:#000;border:none;border-radius:10px">−</button>
+        <span id="player-count-display" style="font-size:3.5rem;font-weight:700;color:var(--accent);font-family:'Playfair Display',serif;flex:1;text-align:center;line-height:1">3</span>
+        <button id="players-plus-btn" class="btn btn-sm" onclick="changePlayerCount(+1)"
+          style="width:52px;height:52px;flex-shrink:0;font-size:1.4rem;background:var(--accent);color:#000;border:none;border-radius:10px">+</button>
       </div>
-      <div class="field mt16">
-        <div class="inline-row">
-          <input type="text" id="player-input" placeholder="Nom du joueur…" maxlength="20" onkeydown="if(event.key==='Enter')addPlayer()">
-          <button class="btn btn-primary btn-sm" style="width:auto;white-space:nowrap" onclick="addPlayer()">+ Ajouter</button>
-        </div>
-      </div>
-      <ul class="players-list" id="players-list"></ul>
+      <p class="mt8 text-center" style="font-size:0.75rem;color:var(--muted)">de 3 à <span id="max-players-label"></span> joueurs</p>
     </div>
 
     <div class="card" id="roles-card">
@@ -803,25 +801,37 @@
 
     <div class="reveal-header">
       <h3>Distribution des rôles</h3>
-      <div class="player-reveal-name mt8" id="reveal-player-name">—</div>
-      <p>Passe le téléphone à ce joueur sans montrer l'écran.</p>
+      <div class="player-reveal-name mt8" id="reveal-player-name" style="font-size:1.3rem;color:var(--muted)">Joueur <span id="reveal-idx">1</span> / <span id="reveal-total">?</span></div>
     </div>
 
-    <div class="word-box" id="word-box">
-      <div class="word-hidden" id="word-hidden" onclick="revealWord()">
-        ● ● ●
-        <div class="tap-hint" style="margin-top:8px">Appuie pour révéler ton mot</div>
-      </div>
-      <div id="word-revealed" style="display:none">
-        <div class="secret-word" id="secret-word-text">—</div>
-        <div id="role-badge-container"></div>
+    <!-- Phase 1 : saisie du nom -->
+    <div id="reveal-name-section">
+      <div class="card card-accent mt16">
+        <p style="text-align:center;margin-bottom:16px">Qui est le joueur&nbsp;<strong style="color:var(--accent)" id="reveal-player-num">1</strong>&nbsp;?</p>
+        <div class="field">
+          <input type="text" id="reveal-name-input" placeholder="Ton prénom…" maxlength="20"
+            onkeydown="if(event.key==='Enter')confirmPlayerName()">
+        </div>
+        <button class="btn btn-primary" onclick="confirmPlayerName()">Valider ✓</button>
       </div>
     </div>
 
-    <button class="btn btn-primary" id="reveal-next-btn" onclick="nextReveal()" disabled>Joueur suivant →</button>
-    <p class="mt8 text-center" style="font-size:0.75rem;color:var(--muted)">
-      Joueur <span id="reveal-idx">1</span> / <span id="reveal-total">?</span>
-    </p>
+    <!-- Phase 2 : révélation du rôle -->
+    <div id="reveal-role-section" style="display:none">
+      <div class="word-box" id="word-box">
+        <div class="word-hidden" id="word-hidden" onclick="revealWord()">
+          ● ● ●
+          <div class="tap-hint" style="margin-top:8px">Appuie pour révéler ton mot</div>
+        </div>
+        <div id="word-revealed" style="display:none">
+          <div class="secret-word" id="secret-word-text">—</div>
+          <div id="role-badge-container"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="reveal-next-btn" onclick="nextReveal()" style="display:none">Clique, puis passe →</button>
+    </div>
+
     <div class="mt16" style="text-align:center">
       <button class="btn btn-secondary btn-sm" onclick="reportWordPair()" style="opacity:0.6;font-size:0.7rem">
         ⚠️ Signaler cette paire de mots
@@ -1583,8 +1593,11 @@ const WORD_PAIRS = [
 // ═══════════════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════════════
+const MAX_PLAYERS = 20;
+
 let state = {
   players: [],           // [{name, role, word, eliminated, score}]
+  playerCount: 3,        // number chosen in setup screen
   citizenWord: '',
   undercoverWord: '',
   undercoverCount: 1,
@@ -1650,7 +1663,7 @@ function notify(msg, duration = 2500) {
 //  SETUP
 // ═══════════════════════════════════════════════════════════════
 function defaultCounts() {
-  const n = state.players.length;
+  const n = state.playerCount;
   // Default UC: 1 for 3-6, 2 for 7-10, 3 for 11+
   const defUC = n >= 11 ? 3 : n >= 7 ? 2 : 1;
   // Default MW: 0 for 3-4, 1 for 5-8, 2 for 9+
@@ -1658,8 +1671,35 @@ function defaultCounts() {
   return { defUC, defMW };
 }
 
+function changePlayerCount(delta) {
+  const newCount = Math.max(3, Math.min(MAX_PLAYERS, state.playerCount + delta));
+  state.playerCount = newCount;
+  document.getElementById('player-count-display').textContent = newCount;
+  // Update minus/plus button styles
+  const minusBtn = document.getElementById('players-minus-btn');
+  const plusBtn = document.getElementById('players-plus-btn');
+  minusBtn.disabled = newCount <= 3;
+  plusBtn.disabled = newCount >= MAX_PLAYERS;
+  minusBtn.style.background = newCount <= 3 ? 'var(--surface)' : 'var(--accent)';
+  minusBtn.style.color = newCount <= 3 ? 'var(--muted)' : '#000';
+  plusBtn.style.background = newCount >= MAX_PLAYERS ? 'var(--surface)' : 'var(--accent)';
+  plusBtn.style.color = newCount >= MAX_PLAYERS ? 'var(--muted)' : '#000';
+  // Update label
+  const lbl = document.getElementById('max-players-label');
+  if (lbl) lbl.textContent = MAX_PLAYERS;
+  // Recalculate defaults and reset role counts
+  const { defUC, defMW } = defaultCounts();
+  const ucEl = document.getElementById('uc-val');
+  const mwEl = document.getElementById('mw-val');
+  if (ucEl) ucEl.textContent = defUC;
+  if (mwEl) mwEl.textContent = defMW;
+  const oracleToggle = document.getElementById('toggle-oracle');
+  if (oracleToggle && newCount < 10) oracleToggle.checked = false;
+  updateCountButtons();
+}
+
 function updateCountButtons() {
-  const n = state.players.length;
+  const n = state.playerCount;
   const uc = parseInt(document.getElementById('uc-val').textContent) || 1;
   const mw = parseInt(document.getElementById('mw-val').textContent) || 0;
   const oracle = parseInt(document.getElementById('oracle-val')?.textContent) || 0;
@@ -1749,62 +1789,13 @@ function resetWordsConfirm() {
   state.wordsConfirmed = false;
 }
 
-function renderPlayersList() {
-  const ul = document.getElementById('players-list');
-  ul.innerHTML = '';
-  state.players.slice().reverse().forEach((p, i) => {
-    const realIdx = state.players.length - 1 - i;
-    const li = document.createElement('li');
-    li.innerHTML = `<span class="player-name">${p.name}</span>
-      <button class="remove-btn" onclick="removePlayer(${realIdx})" title="Retirer">✕</button>`;
-    ul.appendChild(li);
-  });
-  // Show/hide roles card
-  const n = state.players.length;
-  const countEl = document.getElementById('player-count');
-  if (countEl) countEl.textContent = n > 0 ? n : '';
-  const rolesCard = document.getElementById('roles-card');
-  if (rolesCard) rolesCard.style.display = n >= 3 ? '' : 'none';
-
-  // Recalculate defaults and clamp current values
-  const { defUC, defMW } = defaultCounts();
-  const ucEl = document.getElementById('uc-val');
-  const mwEl = document.getElementById('mw-val');
-  if (ucEl && mwEl) {
-    // Set defaults when player count changes
-    ucEl.textContent = defUC;
-    mwEl.textContent = defMW;
-    // Reset oracle if below threshold
-    const oracleToggle = document.getElementById('toggle-oracle');
-    if (oracleToggle && n < 10) oracleToggle.checked = false;
-    updateCountButtons();
-  }
-}
-
-function addPlayer() {
-  const input = document.getElementById('player-input');
-  const name = input.value.trim();
-  if (!name) return;
-  if (state.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-    notify('Ce nom existe déjà !'); return;
-  }
-  if (state.players.length >= 12) { notify('Maximum 12 joueurs'); return; }
-  state.players.push({ name, score: 0 });
-  input.value = '';
-  renderPlayersList();
-  input.focus();
-}
-
-function removePlayer(idx) {
-  state.players.splice(idx, 1);
-  renderPlayersList();
-}
+// ─── (player list functions removed — names entered during reveal phase) ───
 
 // ═══════════════════════════════════════════════════════════════
 //  START GAME
 // ═══════════════════════════════════════════════════════════════
 function startGame() {
-  const n = state.players.length;
+  const n = state.playerCount;
   if (n < 3) { notify('Il faut au moins 3 joueurs !'); return; }
 
   const ucCount = parseInt(document.getElementById('uc-val').textContent) || 1;
@@ -1852,31 +1843,24 @@ function startGame() {
     state.wordPairIndex = idx;
   } else {
     if (!state.wordsConfirmed) { notify('Validez d\'abord les mots !'); return; }
-    // Les mots sont déjà stockés dans state.citizenWord / state.undercoverWord via confirmCustomWords()
   }
 
-  // Assign roles
-  const shuffledPlayers = shuffle([...Array(n).keys()]);
+  // Build role assignments (shuffled) — names will be filled during reveal phase
+  const shuffledSlots = shuffle([...Array(n).keys()]);
   const roleAssignment = [];
-
-  // Fill citizens
   for (let i = 0; i < n; i++) roleAssignment.push('citizen');
-  // Assign undercov­er
-  for (let i = 0; i < state.undercoverCount; i++) roleAssignment[i] = 'undercover';
-  // Assign homme(s) invisible(s)
-  for (let i = 0; i < mwCount; i++) roleAssignment[state.undercoverCount + i] = 'mrwhite';
-  // Assign oracle (takes a citizen slot)
-  if (hasOracle) roleAssignment[state.undercoverCount + mwCount] = 'oracle';
+  for (let i = 0; i < ucCount; i++) roleAssignment[i] = 'undercover';
+  for (let i = 0; i < mwCount; i++) roleAssignment[ucCount + i] = 'mrwhite';
+  if (hasOracle) roleAssignment[ucCount + mwCount] = 'oracle';
 
-  // Map to shuffled players
-  state.players.forEach((p, i) => {
-    const role = roleAssignment[shuffledPlayers.indexOf(i)];
-    p.role = role;
-    p.eliminated = false;
-    p.word = role === 'citizen' ? state.citizenWord
-           : role === 'undercover' ? state.undercoverWord
-           : role === 'oracle' ? state.citizenWord  // oracle gets citizenWord as display placeholder; reveal handles both
-           : '???';
+  // Pre-create player slots with roles but no names yet
+  state.players = Array.from({ length: n }, (_, i) => {
+    const role = roleAssignment[shuffledSlots.indexOf(i)];
+    const word = role === 'citizen' ? state.citizenWord
+               : role === 'undercover' ? state.undercoverWord
+               : role === 'oracle' ? state.citizenWord
+               : '???';
+    return { name: '', role, word, eliminated: false, score: 0 };
   });
 
   state.round = 1;
@@ -1894,21 +1878,51 @@ function startGame() {
 function renderRevealScreen() {
   const i = state.revealIndex;
   const total = state.players.length;
-  const player = state.players[i];
 
-  document.getElementById('reveal-player-name').textContent = player.name;
   document.getElementById('reveal-idx').textContent = i + 1;
   document.getElementById('reveal-total').textContent = total;
+  document.getElementById('reveal-player-num').textContent = i + 1;
 
-  // Reset
+  // Show name-entry phase, hide role-reveal phase
+  document.getElementById('reveal-name-section').style.display = '';
+  document.getElementById('reveal-role-section').style.display = 'none';
+
+  // Clear the name input
+  const nameInput = document.getElementById('reveal-name-input');
+  nameInput.value = '';
+  setTimeout(() => nameInput.focus(), 100);
+
+  // Reset role reveal state
   document.getElementById('word-hidden').style.display = '';
   document.getElementById('word-revealed').style.display = 'none';
-  document.getElementById('reveal-next-btn').disabled = true;
-  document.getElementById('reveal-next-btn').textContent = i < total - 1 ? 'Joueur suivant →' : 'Commencer la partie →';
-
+  document.getElementById('reveal-next-btn').style.display = 'none';
   const box = document.getElementById('word-box');
-  box.className = 'word-box';
+  if (box) box.className = 'word-box';
   state.wordRevealed = false;
+}
+
+function confirmPlayerName() {
+  const nameInput = document.getElementById('reveal-name-input');
+  const name = nameInput.value.trim();
+  if (!name) { notify('Entre ton prénom !'); return; }
+
+  // Check for duplicate names among already-named players
+  const alreadyUsed = state.players.slice(0, state.revealIndex).some(
+    p => p.name.toLowerCase() === name.toLowerCase()
+  );
+  if (alreadyUsed) { notify('Ce prénom est déjà pris !'); return; }
+
+  // Assign name
+  state.players[state.revealIndex].name = name;
+
+  // Show role reveal phase
+  document.getElementById('reveal-name-section').style.display = 'none';
+  document.getElementById('reveal-role-section').style.display = '';
+
+  const i = state.revealIndex;
+  const total = state.players.length;
+  document.getElementById('reveal-next-btn').textContent =
+    i < total - 1 ? 'Clique, puis passe →' : 'Commencer la partie →';
 }
 
 function revealWord() {
@@ -1922,7 +1936,6 @@ function revealWord() {
   const badgeContainer = document.getElementById('role-badge-container');
 
   if (player.role === 'oracle') {
-    // Show both words in random order without labelling which is which
     const words = Math.random() < 0.5
       ? [state.citizenWord, state.undercoverWord]
       : [state.undercoverWord, state.citizenWord];
@@ -1940,7 +1953,7 @@ function revealWord() {
   const box = document.getElementById('word-box');
   box.className = 'word-box revealed';
 
-  document.getElementById('reveal-next-btn').disabled = false;
+  document.getElementById('reveal-next-btn').style.display = '';
 }
 
 function nextReveal() {
@@ -1960,6 +1973,43 @@ function alivePlayers() {
   return state.players.filter(p => !p.eliminated);
 }
 
+function getVoteOrder(alivePlayers) {
+  // Build a circular permutation of alive players in registration order (player 1, 2, ...).
+  // For round 1: choose a shift so that mrwhite is NOT first.
+  // For subsequent rounds: random shift.
+  const n = alivePlayers.length;
+  if (n === 0) return [];
+
+  // alivePlayers are already in original registration order (state.players order, filtered)
+  const mrwhiteIdx = alivePlayers.findIndex(p => p.role === 'mrwhite');
+
+  let shift;
+  if (state.round === 1) {
+    // Must choose shift such that position 0 is not mrwhite.
+    // With shift k, first player is alivePlayers[k % n].
+    // So we need k % n !== mrwhiteIdx.
+    const validShifts = [];
+    for (let k = 0; k < n; k++) {
+      if (k !== mrwhiteIdx) validShifts.push(k);
+    }
+    // If no mrwhite (or mrwhite doesn't exist), any shift is valid
+    if (validShifts.length === 0 || mrwhiteIdx === -1) {
+      shift = Math.floor(Math.random() * n);
+    } else {
+      shift = validShifts[Math.floor(Math.random() * validShifts.length)];
+    }
+  } else {
+    shift = Math.floor(Math.random() * n);
+  }
+
+  // Apply circular shift
+  const order = [];
+  for (let i = 0; i < n; i++) {
+    order.push(alivePlayers[(shift + i) % n]);
+  }
+  return order;
+}
+
 function renderPlayScreen() {
   document.getElementById('play-round').textContent = state.round;
   const alive = alivePlayers();
@@ -1967,7 +2017,7 @@ function renderPlayScreen() {
 
   const list = document.getElementById('turn-order-list');
   list.innerHTML = '';
-  const order = shuffle(alive);
+  const order = getVoteOrder(alive);
   order.forEach(p => {
     const li = document.createElement('li');
     li.textContent = p.name;
@@ -2341,10 +2391,8 @@ function reportWordPair() {
 
     // Remettre la partie à zéro
     state.gamePhase = 'setup';
-    const names = state.players.map(p => p.name);
-    state.players = names.map(n => ({ name: n, score: getScores()[n] || 0 }));
+    state.players = [];
     showScreen('screen-setup');
-    renderPlayersList();
     notify('Paire signalée — la partie a été annulée.');
   }
 
@@ -2352,11 +2400,9 @@ function reportWordPair() {
 }
 
 function rematch() {
-  // Keep same players, same settings — restart
-  const names = state.players.map(p => p.name);
-  state.players = names.map(n => ({ name: n, score: 0 }));
+  // Keep same player count and settings — restart
+  state.players = [];
   showScreen('screen-setup');
-  renderPlayersList();
   notify('Même équipe, nouvelle partie !');
 }
 
@@ -2396,9 +2442,18 @@ window.showScreen = function(id) {
   if (id === 'screen-vote') renderVoteScreen();
   if (id === 'screen-setup') {
     updatePairsCount();
+    // Init player count display
+    document.getElementById('player-count-display').textContent = state.playerCount;
+    changePlayerCount(0); // refresh button styles
+    const { defUC, defMW } = defaultCounts();
+    const ucEl = document.getElementById('uc-val');
+    const mwEl = document.getElementById('mw-val');
+    if (ucEl) ucEl.textContent = defUC;
+    if (mwEl) mwEl.textContent = defMW;
     updateCountButtons();
+    // Show roles card always (since we always have >= 3)
     const rc = document.getElementById('roles-card');
-    if (rc) rc.style.display = state.players.length >= 3 ? '' : 'none';
+    if (rc) rc.style.display = '';
     // Restaurer le cadre Mots et son état
     const wc = document.getElementById('words-card');
     if (wc) wc.style.display = '';
@@ -2430,6 +2485,14 @@ function updatePairsCount() {
   el.title = `${total} paires au total — ${blacklisted} signalée(s) — ${used} déjà jouée(s)`;
 }
 updatePairsCount();
+// Initialize player count display
+changePlayerCount(0);
+const { defUC: _defUC, defMW: _defMW } = defaultCounts();
+const _ucEl = document.getElementById('uc-val');
+const _mwEl = document.getElementById('mw-val');
+if (_ucEl) _ucEl.textContent = _defUC;
+if (_mwEl) _mwEl.textContent = _defMW;
+updateCountButtons();
 </script>
 </body>
 </html>
