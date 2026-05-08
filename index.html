@@ -1,0 +1,2599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imposteurs !</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141418;
+    --surface2: #1c1c22;
+    --border: #2a2a35;
+    --accent: #c8a96e;
+    --accent2: #e8c98e;
+    --danger: #c0392b;
+    --danger2: #e74c3c;
+    --citizen: #2ecc71;
+    --undercover: #9b59b6;
+    --mrwhite: #3498db;
+    --oracle: #e67e22;
+    --text: #e8e6e0;
+    --muted: #888880;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(200,169,110,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(155,89,182,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* ─── Typography ─── */
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 8vw, 4rem);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(200,169,110,0.3);
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  h3 {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  p { line-height: 1.6; color: var(--muted); font-size: 0.9rem; }
+
+  /* ─── Screens ─── */
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-accent {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(200,169,110,0.05) 100%);
+  }
+
+  /* ─── Buttons ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    width: 100%;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    width: 100%;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+  .btn-danger:hover { background: var(--danger2); }
+
+  .btn-sm {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ─── Inputs ─── */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--accent); }
+
+  /* ─── Range input ─── */
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .range-val {
+    min-width: 28px;
+    text-align: right;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ─── Players list ─── */
+  .players-list { list-style: none; }
+  .players-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .player-name { font-size: 0.9rem; }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .remove-btn:hover { color: var(--danger2); }
+
+  /* ─── Secret word reveal ─── */
+  .reveal-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .player-reveal-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .word-box {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    text-align: center;
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .word-box.revealed {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--surface2), rgba(200,169,110,0.08));
+  }
+
+  .word-hidden {
+    font-size: 2rem;
+    letter-spacing: 0.5em;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+  }
+  .word-hidden:hover { color: var(--accent); }
+
+  .secret-word {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 6vw, 2.2rem);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 12px;
+  }
+
+  .badge-citizen { background: rgba(46,204,113,0.15); color: var(--citizen); border: 1px solid rgba(46,204,113,0.3); }
+  .badge-undercover { background: rgba(155,89,182,0.15); color: var(--undercover); border: 1px solid rgba(155,89,182,0.3); }
+  .badge-mrwhite { background: rgba(52,152,219,0.15); color: var(--mrwhite); border: 1px solid rgba(52,152,219,0.3); }
+  .badge-oracle { background: rgba(230,126,34,0.15); color: var(--oracle); border: 1px solid rgba(230,126,34,0.3); }
+
+  .tap-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ─── Turn order ─── */
+  .turn-list { list-style: none; counter-reset: turns; }
+  .turn-list li {
+    counter-increment: turns;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .turn-list li:last-child { border-bottom: none; }
+  .turn-list li::before {
+    content: counter(turns);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* ─── Vote section ─── */
+  .vote-list { list-style: none; }
+  .vote-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .vote-item.has-votes { border-color: rgba(200,169,110,0.4); }
+
+  .vote-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .vote-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .vote-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .vote-btn.plus:hover:not(:disabled) { background: rgba(200,169,110,0.1); }
+  .vote-btn.minus:hover:not(:disabled) { background: rgba(192,57,43,0.1); border-color: var(--danger2); color: var(--danger2); }
+
+  .vote-name {
+    flex: 1;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .vote-count {
+    min-width: 28px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .vote-count.has-votes { color: var(--accent); }
+
+  @keyframes halo-rotate {
+    0%   { --halo-angle: 0deg; }
+    100% { --halo-angle: 360deg; }
+  }
+  @property --halo-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  .btn-glow {
+    background: #2ecc71 !important;
+    color: #0d0d0f !important;
+    position: relative;
+    z-index: 0;
+    animation: halo-rotate 2s linear infinite;
+  }
+  .btn-glow::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 10px;
+    background: conic-gradient(
+      from var(--halo-angle),
+      #ff4e50, #fc913a, #f9d423, #2ecc71, #1abc9c,
+      #3498db, #9b59b6, #e91e8c, #ff4e50
+    );
+    z-index: -1;
+    filter: blur(4px);
+  }
+  .btn-glow::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 10px;
+    background: conic-gradient(
+      from var(--halo-angle),
+      #ff4e50, #fc913a, #f9d423, #2ecc71, #1abc9c,
+      #3498db, #9b59b6, #e91e8c, #ff4e50
+    );
+    z-index: -2;
+  }
+
+  /* ─── Result section ─── */
+  .result-header {
+    text-align: center;
+    padding: 32px 0;
+  }
+  .result-header h2 {
+    white-space: nowrap;
+    font-size: clamp(1rem, 5vw, 2rem);
+    overflow: hidden;
+  }
+  .result-header p {
+    font-size: clamp(0.75rem, 3.5vw, 1rem);
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .result-icon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 16px;
+    animation: pulse 1s ease;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .eliminated-reveal {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+  }
+
+  .role-reveal-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+
+  /* ─── Stats / Scores ─── */
+  .stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-val { color: var(--accent); font-weight: 500; }
+
+  /* ─── Header ─── */
+  .app-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-top: 8px;
+  }
+  .subtitle {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  /* ─── Tabs / Step indicator ─── */
+  .steps {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+  .step {
+    height: 3px;
+    flex: 1;
+    background: var(--border);
+    border-radius: 3px;
+    transition: background 0.3s;
+  }
+  .step.done { background: var(--accent); }
+  .step.active { background: var(--accent2); }
+
+  /* ─── Toggle ─── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+  }
+  .toggle-label { font-size: 0.85rem; }
+  .toggle-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  #toggle-oracle:checked + .toggle-slider { background: var(--oracle) !important; }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  /* ─── MrWhite guess ─── */
+  .mrwhite-prompt {
+    background: rgba(52,152,219,0.08);
+    border: 1px solid rgba(52,152,219,0.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+  }
+
+  /* ─── Oracle reveal ─── */
+  .oracle-prompt {
+    background: rgba(230,126,34,0.08);
+    border: 1px solid rgba(230,126,34,0.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+  }
+
+  /* ─── Scores table ─── */
+  .score-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .score-item:last-child { border-bottom: none; }
+  .score-pts {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  /* ─── Misc ─── */
+  .mt8 { margin-top: 8px; }
+  .mt16 { margin-top: 16px; }
+  .mt24 { margin-top: 24px; }
+  .gap8 { display: flex; flex-direction: column; gap: 8px; }
+  .text-center { text-align: center; }
+  .text-accent { color: var(--accent); }
+  .inline-row { display: flex; gap: 10px; }
+
+  .notification {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    transition: transform 0.3s;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .notification.show { transform: translateX(-50%) translateY(0); }
+
+  .word-pairs-info {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .current-player-banner {
+    background: linear-gradient(135deg, rgba(200,169,110,0.1), rgba(200,169,110,0.05));
+    border: 1px solid rgba(200,169,110,0.3);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .current-player-banner .name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--accent);
+  }
+  .current-player-banner .desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════════════════════════════ SCREEN: HOME ══════════════════════════════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="app-header">
+      <div>
+        <h1 style="white-space:nowrap;background:linear-gradient(90deg,#ff4e50,#fc913a,#f9d423,#2ecc71,#1abc9c,#3498db,#9b59b6,#e91e8c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Imposteurs&nbsp;!</h1>
+        <div class="subtitle">Jeu de déduction sociale - Sébastien Dumortier</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px">
+      <a href="https://paypal.me/sebatiduroc/1EUR" target="_blank" rel="noopener noreferrer"
+        style="
+          display:inline-flex;align-items:center;gap:8px;
+          padding:12px 24px;
+          background:linear-gradient(135deg,#ff6b35,#f7c59f);
+          color:#1a0a00;
+          font-family:'DM Mono',monospace;
+          font-size:0.85rem;font-weight:700;
+          letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;
+          border-radius:50px;
+          box-shadow:0 0 18px rgba(255,107,53,0.55),0 0 36px rgba(255,107,53,0.25);
+          animation:donate-pulse 2.2s ease-in-out infinite;
+        ">
+        ☕ Donner 1€
+      </a>
+    </div>
+    <style>
+      @keyframes donate-pulse {
+        0%,100% { box-shadow:0 0 18px rgba(255,107,53,0.55),0 0 36px rgba(255,107,53,0.25); }
+        50%      { box-shadow:0 0 28px rgba(255,107,53,0.85),0 0 56px rgba(255,107,53,0.45); }
+      }
+    </style>
+
+    <div class="card card-accent">
+      <h3>Comment jouer</h3>
+      <div class="mt8 gap8">
+        <p>🎭 Chaque joueur reçoit un mot secret. La majorité partage le même mot (citoyens). Un ou deux joueurs ont un mot <em>proche mais différent</em> (agent secret). Parfois, un joueur ne reçoit <em>aucun mot</em> (homme invisible).</p>
+        <p>💬 À chaque tour, chacun donne un indice d'un mot. Puis on vote pour éliminer un suspect.</p>
+        <p>🏆 Les citoyens gagnent en éliminant tous les imposteurs. Les agents secrets gagnent s'ils survivent en minorité. L'homme invisible gagne s'il est éliminé mais devine le mot des citoyens.</p>
+        <p>🔮 <strong style="color:var(--oracle)">Oracle</strong> <em>(optionnel, 10+ joueurs)</em> — Connaît les deux mots mais ignore lequel appartient aux citoyens. Il joue comme un citoyen pour aider l'homme invisible sans se faire remarquer. Il gagne avec l'homme invisible, mais <strong>ne peut pas l'aider</strong> quand celui-ci doit deviner le mot. Si l'homme invisible est éliminé, l'oracle l'est aussi automatiquement.</p>
+      </div>
+    </div>
+
+    <div class="mt16 gap8">
+      <button class="btn btn-primary" onclick="enterFullscreen();showScreen('screen-setup')">Nouvelle partie</button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-scores')">Scores</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: SETUP ══════════════════════════════════ -->
+  <div class="screen" id="screen-setup">
+    <div class="steps">
+      <div class="step done" id="step1"></div>
+      <div class="step active" id="step2"></div>
+      <div class="step" id="step3"></div>
+    </div>
+    <h2>Configuration</h2>
+    <p class="mt8">Paramétrez la partie.</p>
+
+    <div class="card mt24">
+      <h3>Nombre de joueurs</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px">
+        <button id="players-minus-btn" class="btn btn-sm" onclick="changePlayerCount(-1)"
+          style="width:52px;height:52px;flex-shrink:0;font-size:1.4rem;background:var(--accent);color:#000;border:none;border-radius:10px">−</button>
+        <span id="player-count-display" style="font-size:3.5rem;font-weight:700;color:var(--accent);font-family:'Playfair Display',serif;flex:1;text-align:center;line-height:1">3</span>
+        <button id="players-plus-btn" class="btn btn-sm" onclick="changePlayerCount(+1)"
+          style="width:52px;height:52px;flex-shrink:0;font-size:1.4rem;background:var(--accent);color:#000;border:none;border-radius:10px">+</button>
+      </div>
+      <p class="mt8 text-center" style="font-size:0.75rem;color:var(--muted)">de 3 à <span id="max-players-label"></span> joueurs</p>
+    </div>
+
+    <div class="card" id="roles-card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h3>Rôles</h3>
+        <span id="max-impostors-label" style="font-size:0.75rem;color:var(--muted)"></span>
+      </div>
+
+      <div class="mt16">
+        <div class="toggle-label">Agent secret</div>
+        <div class="toggle-desc">Joueur(s) avec un mot différent</div>
+        <input type="hidden" id="toggle-undercover" value="1">
+      </div>
+
+      <div id="undercover-count-row" class="mt16">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button class="btn btn-sm" id="uc-minus" onclick="changeCount('uc',-1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">−</button>
+          <span style="font-size:0.85rem;color:var(--muted);flex:1;text-align:center">
+            <span id="uc-val">1</span> agent secret<span id="uc-plural"></span>
+          </span>
+          <button class="btn btn-sm" id="uc-plus" onclick="changeCount('uc',+1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">+</button>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Homme invisible</div>
+          <div class="toggle-desc">Joueur(s) sans mot (risqué !)</div>
+        </div>
+      </div>
+      <div class="mt8">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button class="btn btn-sm" id="mw-minus" onclick="changeCount('mw',-1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">−</button>
+          <span style="font-size:0.85rem;color:var(--muted);flex:1;text-align:center">
+            <span id="mw-val">0</span> homme<span id="mw-plural"></span> invisible<span id="mw-plural2"></span>
+          </span>
+          <button class="btn btn-sm" id="mw-plus" onclick="changeCount('mw',+1)" style="width:36px;flex-shrink:0;background:var(--accent);color:#000;border:none">+</button>
+        </div>
+      </div>
+
+      <div id="oracle-row" style="display:none">
+        <hr class="divider">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label" style="color:var(--oracle)">🔮 Oracle</div>
+            <div class="toggle-desc">Connaît les deux mots, aide l'homme invisible</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-oracle" onchange="updateCountButtons()">
+            <span class="toggle-slider" style="background:var(--border)"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="words-card">
+      <h3>Mots</h3>
+      <div id="words-toggle-row" class="toggle-row mt8">
+        <div>
+          <div class="toggle-label">Mots aléatoires</div>
+          <div class="toggle-desc">Piocher dans la liste intégrée</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-random-words" checked onchange="toggleWordMode()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div id="custom-words-section" style="display:none">
+        <div class="field mt16">
+          <label>Mot des citoyens</label>
+          <input type="text" id="citizen-word" placeholder="ex: chien" oninput="resetWordsConfirm()">
+        </div>
+        <div class="field">
+          <label>Mot des agents secrets</label>
+          <input type="text" id="undercover-word" placeholder="ex: loup" oninput="resetWordsConfirm()">
+        </div>
+        <button class="btn btn-primary mt8" id="confirm-words-btn" onclick="confirmCustomWords()" style="background:var(--accent);color:#000">✓ Valider les mots</button>
+      </div>
+
+      <div id="random-words-info" class="word-pairs-info mt8">
+        <span id="pairs-count"></span> paires de mots disponibles.
+      </div>
+    </div>
+
+    <div class="inline-row mt16">
+      <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Retour</button>
+      <button class="btn btn-primary" onclick="startGame()">Démarrer →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: REVEAL ══════════════════════════════════ -->
+  <div class="screen" id="screen-reveal">
+    <div class="steps">
+      <div class="step done"></div>
+      <div class="step done"></div>
+      <div class="step active"></div>
+    </div>
+
+    <div class="reveal-header">
+      <h3>Distribution des rôles</h3>
+      <div class="player-reveal-name mt8" id="reveal-player-name" style="font-size:1.3rem;color:var(--muted)">Joueur <span id="reveal-idx">1</span> / <span id="reveal-total">?</span></div>
+    </div>
+
+    <!-- Phase 1 : saisie du nom -->
+    <div id="reveal-name-section">
+      <div class="card card-accent mt16">
+        <p style="text-align:center;margin-bottom:16px">Qui est le joueur&nbsp;<strong style="color:var(--accent)" id="reveal-player-num">1</strong>&nbsp;?</p>
+        <div class="field">
+          <input type="text" id="reveal-name-input" placeholder="Ton prénom…" maxlength="20"
+            onkeydown="if(event.key==='Enter')confirmPlayerName()">
+        </div>
+        <button class="btn btn-primary" onclick="confirmPlayerName()">Valider ✓</button>
+      </div>
+    </div>
+
+    <!-- Phase 2 : révélation du rôle -->
+    <div id="reveal-role-section" style="display:none">
+      <div class="word-box" id="word-box">
+        <div class="word-hidden" id="word-hidden" onclick="revealWord()">
+          ● ● ●
+          <div class="tap-hint" style="margin-top:8px">Appuie pour révéler ton mot</div>
+        </div>
+        <div id="word-revealed" style="display:none">
+          <div class="secret-word" id="secret-word-text">—</div>
+          <div id="role-badge-container"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="reveal-next-btn" onclick="nextReveal()" style="display:none">Clique, puis passe →</button>
+    </div>
+
+    <div class="mt16" style="text-align:center">
+      <button class="btn btn-secondary btn-sm" onclick="reportWordPair()" style="opacity:0.6;font-size:0.7rem">
+        ⚠️ Signaler cette paire de mots
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: PLAY ══════════════════════════════════ -->
+  <div class="screen" id="screen-play">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div>
+        <h3>Manche <span id="play-round">1</span></h3>
+        <h2 style="margin-top:4px">Tour de parole</h2>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:0.75rem;color:var(--muted)">Joueurs</div>
+        <div style="font-size:1.1rem;color:var(--accent)" id="play-alive-count">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Ordre de jeu</h3>
+      <ul class="turn-list mt16" id="turn-order-list"></ul>
+    </div>
+
+    <div class="card mt8">
+      <p>Chaque joueur donne <strong>un seul indice</strong> sur son mot, sans le dire directement. Soyez vagues mais pas trop !</p>
+    </div>
+
+    <button class="btn btn-primary mt16" onclick="showScreen('screen-vote')">Passer au vote →</button>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: VOTE ══════════════════════════════════ -->
+  <div class="screen" id="screen-vote">
+    <h2>Vote</h2>
+    <p class="mt8">Distribuez les votes à l'aide des boutons + et −.</p>
+
+    <div class="card mt24">
+      <h3>Votes : <span id="votes-cast">0</span> / <span id="votes-needed">0</span></h3>
+      <ul class="vote-list mt16" id="vote-list"></ul>
+    </div>
+
+    <div id="vote-tally" class="card mt8" style="display:none">
+      <h3>Résultat du vote</h3>
+      <div id="vote-tally-content" class="mt16"></div>
+    </div>
+
+    <button class="btn btn-primary mt16" id="confirm-vote-btn" onclick="confirmVote()">Valider →</button>
+    <button class="btn btn-secondary mt8" onclick="showScreen('screen-play')">← Retour</button>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: ELIMINATION ══════════════════════════════════ -->
+  <div class="screen" id="screen-elimination">
+    <div class="result-header">
+      <span class="result-icon" id="elim-icon">💀</span>
+      <h2 id="elim-title">Éliminé !</h2>
+    </div>
+
+    <div class="eliminated-reveal" id="elim-reveal">
+      <div class="role-reveal-name" id="elim-name">—</div>
+      <div id="elim-role-badge"></div>
+      <div id="elim-word" class="mt8" style="font-size:0.85rem;color:var(--muted)"></div>
+    </div>
+
+    <!-- Oracle auto-elimination notice -->
+    <div id="oracle-death-notice" style="display:none;margin:16px 0;padding:16px;background:rgba(230,126,34,0.10);border:1px solid rgba(230,126,34,0.4);border-radius:12px;text-align:center">
+      <div style="font-size:1.8rem;margin-bottom:8px">🔮</div>
+      <div style="color:var(--oracle);font-weight:600;font-size:0.95rem" id="oracle-death-name"></div>
+      <div style="color:var(--muted);font-size:0.8rem;margin-top:4px">l'Oracle est éliminé automatiquement.</div>
+    </div>
+
+    <!-- Mr. White guess section -->
+    <div id="mrwhite-guess-section" style="display:none">
+      <div class="mrwhite-prompt">
+        <h3>L'homme invisible devine !</h3>
+        <p class="mt8">L'homme invisible a été éliminé. Il peut encore gagner en devinant le mot des citoyens.</p>
+        <div id="oracle-cannot-help" class="mt8" style="display:none;padding:10px;background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.3);border-radius:8px;font-size:0.8rem;color:var(--oracle)">
+          🔮 L'Oracle a l'interdiction d'aider à cette étape.
+        </div>
+        <div class="field mt16">
+          <label>Quel est le mot des citoyens ?</label>
+          <input type="text" id="mrwhite-guess-input" placeholder="Votre réponse…">
+        </div>
+        <button class="btn btn-primary mt8" onclick="judgeMrWhite()">Valider</button>
+      </div>
+    </div>
+
+    <div id="elim-continue-section" class="mt16">
+      <div id="game-status-msg" class="card" style="display:none;text-align:center">
+        <div id="game-status-text"></div>
+      </div>
+      <button class="btn btn-primary mt16" id="elim-continue-btn" onclick="continueAfterElim()">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: GAME OVER ══════════════════════════════════ -->
+  <div class="screen" id="screen-gameover">
+    <div class="result-header">
+      <span class="result-icon" id="go-icon">🏆</span>
+      <h2 id="go-title">Victoire !</h2>
+      <p id="go-subtitle" class="mt8"></p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Révélation des rôles</h3>
+      <div id="final-reveal-list" class="mt16"></div>
+    </div>
+
+    <div class="inline-row mt24">
+      <button class="btn btn-secondary" onclick="showScreen('screen-home')">Accueil</button>
+      <button class="btn btn-primary" onclick="rematch()">Revanche →</button>
+    </div>
+
+    <div class="mt16" style="text-align:center">
+      <button class="btn btn-secondary btn-sm" onclick="reportWordPair()" style="opacity:0.6;font-size:0.7rem">
+        ⚠️ Signaler cette paire de mots
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ SCREEN: SCORES ══════════════════════════════════ -->
+  <div class="screen" id="screen-scores">
+    <h2>Classement</h2>
+    <p class="mt8">Victoires cumulées sur cet appareil.</p>
+
+    <div class="card mt24">
+      <div id="scores-list"></div>
+    </div>
+
+    <div class="inline-row mt16">
+      <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Retour</button>
+      <button class="btn btn-danger btn-sm" style="flex:0" onclick="clearScores()">Effacer</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<div class="notification" id="notification"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  WORD PAIRS DATABASE
+// ═══════════════════════════════════════════════════════════════
+const WORD_PAIRS = [
+  // Animaux domestiques & sauvages
+  ["chat","tigre"],["chien","loup"],["lion","panthère"],["éléphant","rhinocéros"],
+  ["dauphin","baleine"],["aigle","faucon"],["grenouille","crapaud"],["lapin","lièvre"],
+  ["cheval","âne"],["cochon","sanglier"],["mouton","chèvre"],["vache","bison"],
+  ["perroquet","corbeau"],["hibou","chouette"],["crabe","homard"],
+  ["serpent","lézard"],["crocodile","caïman"],["guépard","léopard"],["ours","gorille"],
+  ["moustique","mouche"],["abeille","guêpe"],["papillon","libellule"],["fourmi","termite"],
+  ["pingouin","manchot"],["poulpe","méduse"],["tortue","iguane"],
+  ["renard","loup"],["girafe","chameau"],["zèbre","cheval"],["hippopotame","rhinocéros"],["panda","koala"],
+  ["saumon","truite"],["canard","oie"],["poule","dindon"],["pigeon","tourterelle"],["moineau","mésange"],
+  ["serpent","limace"],["hérisson","hamster"],["araignée","scorpion"],["coccinelle","scarabée"],
+  ["grillon","sauterelle"],["bourdon","frelon"],["mouette","goéland"],["cigogne","héron"],
+  ["paon","faisan"],["thon","sardine"],["oursin","étoile de mer"],["coquille Saint-Jacques","moule"],
+  // Nourriture & boissons
+  ["café","thé"],["pizza","tarte flambée"],["burger","sandwich"],
+  ["crêpe","gaufre"],["croissant","brioche"],["baguette","pain de mie"],["fromage","yaourt"],
+  ["chocolat","caramel"],["glace","sorbet"],["fraise","framboise"],
+  ["pomme","poire"],["citron","orange"],["banane","mangue"],["carotte","navet"],
+  ["soupe","bouillon"],
+  ["jus d'orange","limonade"],["eau","soda"],
+  ["lasagnes","ravioli"],["risotto","paella"],["couscous","tajine"],
+  ["fondue","raclette"],["quiche","pizza"],["tarte","gâteau"],["madeleine","biscuit"],
+  ["macaron","éclair"],["pain au chocolat","croissant"],["beignet","churros"],["flan","crème brûlée"],
+  ["camembert","brie"],["gruyère","mozzarella"],
+  ["jambon","chorizo"],["saucisson","salami"],
+  ["crevette","moule"],["saumon","thon"],
+  ["poivron","piment"],["courgette","aubergine"],["brocoli","chou-fleur"],["épinard","salade"],
+  ["noisette","amande"],["pistache","cacahuète"],["noix","châtaigne"],
+  ["miel","confiture"],["beurre","margarine"],["crème","lait"],
+  ["smoothie","milkshake"],["cappuccino","café"],
+  // Sports & loisirs
+  ["football","rugby"],["tennis","badminton"],["natation","plongeon"],["ski","snowboard"],
+  ["boxe","judo"],["vélo","course à pied"],["golf","pétanque"],["échecs","dames"],
+  ["randonnée","escalade"],["surf","skateboard"],["yoga","danse"],
+  ["basketball","handball"],["volleyball","beach-volley"],["hockey","patinage"],
+  ["karaté","taekwondo"],
+  ["luge","bobsleigh"],["équitation","cyclisme"],["plongée","natation"],
+  ["pêche","chasse"],["jardinage","cuisine"],["dessin","aquarelle"],["photographie","vidéo"],
+  ["jeu vidéo","jeu de société"],["puzzle","maquette"],
+  // Transports
+  ["avion","hélicoptère"],["train","métro"],["voiture","camion"],["mobylette","moto"],
+  ["bateau","ferry"],["tram","bus"],["taxi","voiture"],["fusée","avion"],
+  ["scooter","trottinette"],["kayak","canoë"],["montgolfière","parachute"],
+  ["ambulance","camion de pompier"],["tracteur","voiture"],
+  // Technologie & informatique
+  ["téléphone","tablette"],["ordinateur","console"],["imprimante","scanner"],
+  ["robot","drone"],["satellite","fusée"],
+  ["mot de passe","code PIN"],["application","logiciel"],
+  ["clavier","souris"],["écran","projecteur"],["disque dur","clé USB"],
+  ["Wi-Fi","Bluetooth"],["GPS","boussole"],["caméra","webcam"],["microphone","haut-parleur"],
+  ["batterie","chargeur"],["câble","adaptateur"],["antenne","routeur"],
+  ["virus informatique","piratage"],
+  ["intelligence artificielle","robot"],["jeu vidéo","application"],
+  // Culture & arts
+  ["livre","magazine"],["film","série"],["guitare","basse"],["piano","orgue"],
+  ["peinture","dessin"],["sculpture","poterie"],["théâtre","cinéma"],["ballet","danse"],
+  ["roman","bande dessinée"],["musée","galerie"],["concert","festival"],
+  ["violon","guitare"],["trompette","saxophone"],["flûte","clarinette"],
+  ["accordéon","harmonica"],["harpe","piano"],
+  ["comédie","tragédie"],["cirque","spectacle"],["marionnette","clown"],
+  ["polar","thriller"],["science-fiction","fantasy"],["biographie","autobiographie"],
+  ["bande dessinée","manga"],["conte","légende"],["encyclopédie","dictionnaire"],
+  ["documentaire","reportage"],["animation","dessin animé"],
+  // Métiers & professions
+  ["médecin","infirmier"],["pompier","policier"],["boulanger","pâtissier"],["dentiste","médecin"],
+  ["architecte","ingénieur"],["avocat","juge"],["journaliste","présentateur"],["professeur","formateur"],
+  ["cuisinier","boulanger"],["acteur","réalisateur"],["musicien","chanteur"],
+  ["plombier","électricien"],["charpentier","maçon"],["menuisier","peintre en bâtiment"],
+  ["coiffeur","esthéticienne"],["pharmacien","médecin"],["vétérinaire","éleveur"],
+  ["astronome","météorologue"],["psychologue","médecin"],
+  ["styliste","couturier"],["bijoutier","horloger"],
+  ["archéologue","historien"],["psychiatre","psychologue"],
+  // École, éducation & bureautique
+  ["crayon","stylo"],["cahier","carnet"],["tableau","ardoise"],["collège","lycée"],
+  ["bibliothèque","médiathèque"],["examen","contrôle"],["diplôme","brevet"],
+  ["règle","équerre"],["compas","rapporteur"],["calculatrice","règle"],["dictionnaire","encyclopédie"],
+  ["cartable","sac à dos"],["trousse","étui"],["surligneur","feutre"],["colle","scotch"],
+  ["tableau blanc","tableau noir"],["vidéoprojecteur","tableau"],
+  ["concours","examen"],["mention","diplôme"],["redoublement","saut de classe"],
+  // Matériaux & matières
+  ["or","argent"],["diamant","rubis"],["marbre","granit"],["bois","bambou"],
+  ["plastique","verre"],["acier","aluminium"],["soie","coton"],
+  ["cuir","tissu"],["carton","papier"],["laine","coton"],["béton","brique"],
+  // Nature, géographie & météo
+  ["plage","rivage"],["forêt","jungle"],["désert","savane"],["île","péninsule"],
+  ["montagne","colline"],["volcan","geyser"],["rivière","fleuve"],["lac","étang"],
+  ["falaise","dune"],["canyon","gorge"],["plateau","plaine"],
+  ["typhon","cyclone"],["tornade","tempête"],["grêle","neige"],
+  ["tsunami","raz-de-marée"],["séisme","avalanche"],["inondation","sécheresse"],
+  ["éclipse","arc-en-ciel"],["marée","courant"],["vague","houle"],
+  // Lieux, constructions & monuments
+  ["château","palais"],["église","cathédrale"],["pont","tunnel"],["tour","gratte-ciel"],
+  ["phare","tour"],["marché","supermarché"],["stade","gymnase"],["gare","aéroport"],
+  ["hôpital","clinique"],["prison","commissariat"],["hôtel","auberge"],
+  ["mosquée","synagogue"],["temple","église"],["abbaye","chapelle"],
+  ["cinéma","théâtre"],["zoo","aquarium"],["planétarium","musée"],["laboratoire","salle de classe"],
+  // Vêtements & accessoires
+  ["chemise","veste"],["pantalon","jean"],["robe","jupe"],["chapeau","casquette"],
+  ["manteau","imperméable"],["chaussures","bottes"],["gants","moufles"],["écharpe","bonnet"],
+  ["pull","sweat"],["short","bermuda"],["t-shirt","débardeur"],["costume","veste"],
+  ["pyjama","survêtement"],["combinaison","salopette"],
+  ["cravate","nœud papillon"],["ceinture","bretelles"],["collier","bracelet"],["bague","chevalière"],
+  ["lunettes","casque"],["montre","bracelet connecté"],["sac à dos","cartable"],["valise","sac de sport"],
+  ["sandales","tongs"],["baskets","chaussures de ville"],["chaussons","pantoufles"],
+  // Saisons, temps & calendrier
+  ["hiver","automne"],["printemps","été"],["orage","tempête"],["brouillard","brume"],
+  ["arc-en-ciel","aurore boréale"],["sécheresse","canicule"],
+  ["lundi","mercredi"],["samedi","dimanche"],["janvier","juillet"],["avril","octobre"],
+  ["matin","soir"],["midi","minuit"],["aube","crépuscule"],
+  // Émotions, sentiments & concepts
+  ["peur","angoisse"],["joie","bonheur"],["colère","frustration"],["amour","amitié"],
+  ["rêve","cauchemar"],["mensonge","secret"],["hasard","destin"],["silence","solitude"],
+  ["espoir","illusion"],["courage","audace"],["patience","persévérance"],["jalousie","envie"],
+  ["orgueil","arrogance"],["honte","gêne"],["nostalgie","ennui"],
+  ["curiosité","étonnement"],["confiance","méfiance"],["générosité","égoïsme"],
+  ["liberté","indépendance"],["vérité","mensonge"],["beauté","laideur"],
+  // Histoire & société
+  ["roi","président"],["guerre","bataille"],["loi","règlement"],["révolution","révolte"],
+  ["empire","royaume"],["élection","vote"],
+  ["dictature","démocratie"],["monarchie","république"],
+  ["impôt","amende"],["grève","manifestation"],["patron","employé"],
+  ["censure","liberté d'expression"],["diplomatie","négociation"],["boycott","sanction"],
+  // Sciences & médecine
+  ["atome","molécule"],["proton","électron"],
+  ["ADN","chromosome"],["cellule","tissu"],["organe","muscle"],
+  ["bactérie","virus"],["vaccin","médicament"],["antibiotique","comprimé"],
+  ["chirurgie","opération"],["radiographie","scanner"],
+  ["allergie","rhume"],["épidémie","pandémie"],["immunité","résistance"],
+  ["gravité","magnétisme"],["lumière","son"],["optique","acoustique"],["évolution","adaptation"],["migration","hibernation"],
+  // Mythologie & fantastique
+  ["ange","démon"],["paradis","enfer"],["prière","méditation"],
+  ["vampire","zombie"],["sorcière","fée"],["dragon","dinosaure"],["fantôme","esprit"],
+  ["alien","robot"],["chevalier","samouraï"],
+  ["elfe","nain"],["ogre","troll"],["sirène","fée"],
+  ["épée","sabre"],["potion","élixir"],["amulette","talisman"],
+  ["Cendrillon","Blanche-Neige"],["Robin des Bois","Zorro"],
+  // Cuisine & ustensiles
+  ["cuillère","fourchette"],["assiette","bol"],["casserole","poêle"],["four","micro-ondes"],
+  ["réfrigérateur","congélateur"],["spatule","louche"],
+  ["cocotte","casserole"],["grill","plancha"],
+  ["passoire","tamis"],["saladier","bol"],["carafe","bouteille"],
+  ["fouet","batteur"],["rouleau à pâtisserie","moule à gâteau"],["balance","verre doseur"],
+  // Corps humain & santé
+  ["cerveau","cœur"],["cœur","poumon"],["foie","rein"],["estomac","intestin"],
+  ["muscle","tendon"],["os","cartilage"],["veine","artère"],
+  ["peau","ongle"],["dent","gencive"],["langue","gorge"],
+  ["genou","coude"],["cheville","poignet"],["épaule","hanche"],["nuque","tempe"],
+  ["rotule","clavicule"],["colonne vertébrale","bassin"],
+  // Maison & ameublement
+  ["canapé","fauteuil"],["lit","matelas"],["armoire","commode"],["bureau","table"],
+  ["chaise","tabouret"],["lampe","lustre"],["rideau","store"],
+  ["tapis","parquet"],["carrelage","lino"],["papier peint","peinture murale"],
+  ["balcon","terrasse"],["jardin","cour"],["garage","cave"],["grenier","sous-sol"],
+  ["cuisine","salle de bain"],["salon","chambre"],["couloir","escalier"],
+  // Musique & sons
+  ["chanson","mélodie"],["rythme","tempo"],
+  ["rock","métal"],["jazz","blues"],["classique","contemporain"],["électro","techno"],
+  ["reggae","ska"],["hip-hop","rap"],["soul","funk"],["country","folk"],
+  ["chorale","orchestre"],
+  // Voyage & tourisme
+  ["camping","hôtel"],["villa","bungalow"],["croisière","voyage en avion"],
+  ["passeport","carte d'identité"],["billet","réservation"],["guide","application"],
+  ["safari","randonnée"],["ski de fond","ski alpin"],
+  // Couleurs & formes
+  ["carré","rectangle"],["cercle","ellipse"],["triangle","trapèze"],["hexagone","pentagone"],
+  ["cube","sphère"],["cône","pyramide"],["cylindre","prisme"],
+  ["turquoise","bleu"],["rose","violet"],["écarlate","orange"],["ocre","beige"],
+  ["doré","argenté"],["noir","gris"],["blanc","crème"],
+  // Divers
+  ["Paris","Lyon"],["France","Belgique"],["soleil","lune"],["étoile","planète"],
+  ["magie","tour de passe-passe"],["rose","tulipe"],["chêne","hêtre"],
+  ["cadeau","surprise"],["fête","anniversaire"],["carnaval","fête foraine"],
+  ["rire","sourire"],["larme","soupir"],["applaudissement","sifflet"],
+  ["ombre","reflet"],["miroir","vitre"],["flamme","braise"],
+  ["labyrinthe","escape game"],["chasse au trésor","énigme"],["blague","devinette"],
+  ["tournesol","coquelicot"],["muguet","rose"],["lavande","romarin"],["cactus","bambou"],
+  // Informatique & réseaux sociaux
+  ["like","retweet"],["story","reel"],["podcast","vlog"],
+  ["stream","vidéo"],["influenceur","créateur de contenu"],["spam","pub"],
+  ["hashtag","tendance"],["viral","buzz"],["mème","gif"],["réseau social","forum"],
+  // Fêtes & événements
+  ["mariage","fiançailles"],["baptême","communion"],["anniversaire","fête"],
+  ["carnaval","défilé"],["concert","festival"],["compétition","tournoi"],
+  // Environnement
+  ["pollution","déchets"],["recyclage","compostage"],["déforestation","incendie"],
+  ["éolienne","panneau solaire"],["vélo","voiture"],
+  // Maths & sciences scolaires
+  ["addition","soustraction"],["multiplication","division"],["fraction","pourcentage"],
+  ["algèbre","géométrie"],["périmètre","aire"],["courbe","droite"],
+  ["masse","poids"],["vitesse","accélération"],["énergie","force"],
+  ["acide","base"],["réaction","transformation"],["mélange","solution"],
+  ["astéroïde","météorite"],["comète","étoile filante"],["galaxie","étoile"],
+  ["orbite","trajectoire"],["télescope","jumelles"],["astronaute","cosmonaute"],
+  ["stalactite","stalagmite"],["volcan","tremblement de terre"],
+  // Langue française
+  ["femme","épouse"],
+  ["dictateur","président"],["ironie","sarcasme"],["monologue","dialogue"],
+  ["narrateur","auteur"],["introduction","conclusion"],
+  ["sonnet","poème"],["fable","conte"],["épopée","légende"],
+  ["préfixe","suffixe"],["homonyme","synonyme"],
+  ["argot","verlan"],["accent","dialecte"],["grammaire","orthographe"],
+  // Jeux & loisirs jeunes
+  ["yoyo","toupie"],["cerf-volant","frisbee"],["patin à roulettes","skateboard"],
+  ["trampoline","balançoire"],["Lego","Playmobil"],["Monopoly","Risk"],
+  ["Scrabble","Boggle"],["dominos","cartes"],["uno","bataille"],
+  ["fléchettes","billard"],["babyfoot","ping-pong"],["pétanque","bowling"],
+  // Outils courants
+  ["marteau","tournevis"],["perceuse","visseuse"],["scie","cutter"],
+  ["pince","tenaille"],["aspirateur","balai"],["tuyau","robinet"],
+  ["tondeuse","débroussailleuse"],["arrosoir","tuyau d'arrosage"],["sécateur","ciseaux"],
+  // Cinéma & séries
+  ["thriller","film d'horreur"],["comédie romantique","comédie"],
+  ["western","film d'action"],["documentaire","reportage"],["anime","dessin animé"],
+  ["gros plan","plan large"],["zoom","fondu"],["biopic","documentaire"],
+  // Mode & beauté
+  ["vintage","occasion"],["teinture","balayage"],["dreadlocks","tresses"],
+  ["chignon","queue de cheval"],["mascara","rouge à lèvres"],["maquillage","soin"],
+  // Sport de compétition
+  ["marathon","sprint"],["saut en hauteur","saut à la perche"],["lancer du disque","lancer du poids"],
+  ["slalom","descente"],["curling","hockey sur glace"],["padel","squash"],
+  ["judo","karaté"],["sumo","lutte"],["kung-fu","boxe"],
+  ["belote","tarot"],["uno","cartes"],
+
+  // 100 nouvelles paires — vocabulaire d'un enfant de 12 ans
+  // Animaux
+  ["mouton","agneau"],["renard","blaireau"],["pieuvre","calmar"],["corbeau","pie"],
+  ["âne","mulet"],["baleine","orque"],["marmotte","écureuil"],["autruche","émeu"],
+  ["poulain","veau"],["taupe","souris"],
+
+  // Nourriture / cuisine
+  ["pancake","gaufre"],["nuggets","cordon bleu"],["soupe","velouté"],["confiture","gelée"],
+  ["beurre de cacahuète","nutella"],["limonade","grenadine"],["bonbon","chewing-gum"],
+  ["chips","pop-corn"],["cookie","brownie"],["donut","beignet"],
+
+  // École
+  ["punition","colle"],["récré","pause"],["cantine","self"],["cartable","sac à dos"],
+  ["interrogation","contrôle"],["bulletin","carnet de notes"],["TPE","exposé"],
+  ["cours","TD"],["absence","retard"],["permanence","étude"],
+
+  // Sport
+  ["penalty","coup franc"],["corner","touche"],["carton rouge","carton jaune"],
+  ["gardien","défenseur"],["arbitre","juge de ligne"],["championnat","coupe"],
+  ["entraînement","match"],["vestiaire","terrain"],["maillot","short"],["tribune","gradin"],
+
+  // Technologie / numérique
+  ["notification","alerte"],["écran tactile","clavier"],["selfie","photo"],
+  ["retweet","partage"],["téléchargement","streaming"],
+  ["batterie","chargeur"],["mise à jour","installation"],["pseudo","nom d'utilisateur"],
+  ["emoji","sticker"],
+
+  // Nature / météo
+  ["orage","averse"],["verglas","gel"],["branche","tronc"],["racine","écorce"],
+  ["falaise","ravin"],["marée haute","marée basse"],["coucher de soleil","lever de soleil"],
+  ["forêt","bois"],["ruisseau","torrent"],["dune","colline"],
+
+  // Maison / quotidien
+  ["douche","bain"],["réveil","alarme"],["aspirateur","balai"],
+  ["poubelle","bac de recyclage"],["clé","badge"],["volet","rideau"],
+  ["congélateur","réfrigérateur"],["lave-vaisselle","éponge"],["couloir","entrée"],["grenier","cave"],
+
+  // Corps / santé
+  ["genou","coude"],["poignet","cheville"],["rhume","grippe"],["fièvre","frisson"],
+  ["pansement","sparadrap"],["fracture","entorse"],["sirop","comprimé"],
+  ["opération","chirurgie"],["infirmière","aide-soignant"],["urgences","cabinet médical"],
+
+  // Émotions / caractère
+  ["timide","introverti"],["bavard","extraverti"],["jaloux","envieux"],
+  ["généreux","altruiste"],["têtu","obstiné"],["flemmard","paresseux"],
+  ["maladroit","gauche"],["rigolo","comique"],["stressé","anxieux"],["fier","vaniteux"],
+
+  // Loisirs / culture pop
+  ["manga","comics"],["cosplay","déguisement"],["escape game","chasse au trésor"],
+  ["karaoké","playback"],["graffiti","street art"],["skate","trottinette"],
+  ["youtuber","streamer"],["fan","supporter"],["concert","festival"],["clip","court-métrage"],
+
+  // 100 nouvelles paires — vocabulaire d’un enfant de 10 ans
+  // Animaux familiers
+  ["chaton","chiot"],["perruche","canari"],["cochon d’Inde","lapin"],["tortue","escargot"],
+  ["poussin","caneton"],["ourson","lionceau"],["louveteau","renardeau"],
+
+  // Animaux sauvages simples
+  ["éléphant","girafe"],["singe","gorille"],["zèbre","cheval sauvage"],["pingouin","ours polaire"],
+  ["crocodile","alligator"],["grenouille","crapaud"],["aigle","hibou"],
+
+  // Nourriture simple
+  ["frite","chips"],["ketchup","mayonnaise"],["tartine","toast"],["yaourt","fromage blanc"],
+  ["compote","confiture"],["jus de pomme","jus d’orange"],["lait","chocolat chaud"],
+  ["spaghettis","pâtes"],["salade","épinards"],["fraise","cerise"],
+
+  // Jouets et jeux
+  ["poupée","nounours"],["voiture télécommandée","train électrique"],
+  ["puzzle","memory"],["ballon","frisbee"],["toupie","yoyo"],
+  ["jeu de société","jeu de cartes"],["cerf-volant","boomerang"],["trampoline","toboggan"],
+
+  // École primaire
+  ["maîtresse","instituteur"],["tableau","ardoise"],["crayon","feutre"],["gomme","correcteur"],
+  ["colle","scotch"],["règle","équerre"],["récréation","pause déjeuner"],
+  ["devoir","leçon"],["dictée","rédaction"],
+
+  // Maison et famille
+  ["maman","papa"],["grand-mère","grand-père"],["cousin","cousine"],["oncle","tante"],
+  ["chambre","salon"],["cuisine","salle à manger"],["jardin","terrasse"],
+  ["doudou","peluche"],["lit","canapé"],["baignoire","douche"],
+
+  // Nature simple
+  ["soleil","nuage"],["pluie","neige"],["fleur","herbe"],["arbre","buisson"],
+  ["rivière","lac"],["montagne","colline"],["plage","forêt"],["caillou","sable"],
+
+  // Corps
+  ["dent","gencive"],["doigt","orteil"],["ventre","dos"],
+  ["nez","oreille"],["sourcil","cil"],["joue","menton"],["épaule","hanche"],
+
+  // Émotions simples
+  ["content","triste"],["surpris","effrayé"],["en colère","calme"],["jaloux","fier"],
+  ["fatigué","reposé"],["timide","courageux"],["impatient","patient"],["joyeux","maussade"],
+
+  // Héros et univers enfants
+  ["sorcier","chevalier"],["fée","princesse"],["dragon","licorne"],["pirate","ninja"],
+  ["superhéros","vilain"],["robot","extraterrestre"],["fantôme","zombie"],
+
+  // Divers quotidien
+  ["vélo","trottinette"],["piscine","parc"],["anniversaire","fête"],["cadeau","surprise"],
+  ["chanson","comptine"],["dessin animé","film"],["bibliothèque","librairie"],
+  ["médecin","dentiste"],["bus","voiture"],["vacances","week-end"],
+
+  // 100 paires supplémentaires — 10 ans
+  // Fruits
+  ["pomme","poire"],["banane","kiwi"],["raisin","cerise"],["pêche","abricot"],
+  ["citron","orange"],["ananas","mangue"],["pastèque","melon"],
+
+  // Légumes
+  ["carotte","radis"],["tomate","concombre"],["haricot vert","petit pois"],
+  ["maïs","brocoli"],["champignon","oignon"],["patate douce","pomme de terre"],
+
+  // Animaux de la ferme
+  ["vache","chèvre"],["cochon","mouton"],["poule","canard"],["cheval","poney"],
+  ["lapin","cobaye"],["âne","boeuf"],["dinde","oie"],
+
+  // Insectes et petites bêtes
+  ["papillon","libellule"],["coccinelle","abeille"],["fourmi","ver de terre"],
+  ["boa","python"],["araignée","mille-pattes"],["grillon","cigale"],
+
+  // Couleurs et formes
+  ["rouge","orange"],["bleu","violet"],["vert","jaune"],["rose","bordeaux"],
+  ["rond","ovale"],["carré","rectangle"],["triangle","étoile"],["coeur","losange"],
+
+  // Vêtements simples
+  ["pull","gilet"],["chaussette","collant"],["pyjama","jogging"],
+  ["imperméable","anorak"],["casquette","bonnet"],["tong","sandale"],
+  ["tablier","blouse"],
+
+  // Sports simples
+  ["course","saut"],["natation","plongée"],["foot","rugby"],["tennis","badminton"],
+  ["ski","luge"],["vélo","roller"],["danse","gym"],["judo","karaté"],
+
+  // Musique
+  ["guitare","piano"],["tambour","maracas"],["flûte","trompette"],
+  ["chanson","rap"],["musique","danse"],
+
+  // Transports simples
+  ["voiture","moto"],["moto","scooter"],["bateau","canoë"],
+  ["avion","hélicoptère"],["vélo","trottinette électrique"],["bus","tramway"],
+  ["train","métro"],
+
+  // Météo et nature
+  ["arc-en-ciel","éclair"],["tonnerre","vent"],["tempête","ouragan"],
+  ["printemps","automne"],["feuille","brindille"],["gland","châtaigne"],
+  ["flocon","grêlon"],
+
+  // Lieux simples
+  ["école","collège"],["supermarché","épicerie"],["cinema","théâtre"],
+  ["parc","jardin public"],["piscine","lac"],["forêt","bois"],
+  ["musée","bibliothèque"],
+
+  // Magie et contes
+  ["magicien","sorcier"],["baguette magique","chapeau"],["château","tour"],
+  ["prince","roi"],["princesse","reine"],["dragon","ogre"],
+  ["fée","lutin"],["génie","djinn"],
+
+  // Jeux de plein air
+  ["cache-cache","loup"],["marelle","élastique"],
+  ["corde à sauter","hula hoop"],["billes","toupie"],
+
+  // Sens et perceptions
+  ["chaud","brûlant"],["froid","glacé"],["doux","rugueux"],
+  ["sucré","salé"],["fort","faible"],["grand","énorme"],["petit","minuscule"],
+  // 100 nouvelles paires — enfant de 10 ans
+  // Instruments de musique
+  ["violon","guitare"],["piano","orgue"],["trompette","trombonne"],["tambour","djembé"],
+  ["flûte","harmonica"],["accordéon","cornemuse"],["contrebasse","violoncelle"],
+
+  // Planètes et espace
+  ["Lune","Soleil"],["Mars","Vénus"],["Jupiter","Saturne"],["étoile","planète"],
+  ["comète","météorite"],["astronaute","cosmonaute"],["fusée","navette"],
+
+  // Matières scolaires
+  ["maths","géométrie"],["français","lecture"],["histoire","géographie"],
+  ["sciences","biologie"],["sport","EPS"],["dessin","arts plastiques"],["musique","chorale"],
+
+  // Outils simples
+  ["marteau","clou"],["tournevis","vis"],["pinceau","brosse"],["arrosoir","tuyau"],
+  ["râteau","pelle"],["ciseaux","cutterr"],["colle","ruban"],
+
+  // Animaux marins
+  ["poisson rouge","poisson clown"],["dauphin","requin"],["pieuvre","méduse"],
+  ["crabe","homard"],["étoile de mer","oursin"],["dauphin","orque"],["hippocampe","raie"],
+
+  // Magie et contes
+  ["sorcière","magicien"],["baguette","chapeau magique"],["potion","élixir"],
+  ["tapis volant","balai"],["miroir magique","boule de cristal"],["sort","malédiction"],
+
+  // Professions simples
+  ["pompier","policier"],["médecin","infirmier"],["boulanger","pâtissier"],
+  ["facteur","livreur"],["jardinier","agriculteur"],["cuisinier","serveur"],
+  ["maçon","plombier"],
+
+  // Meubles et maison
+  ["armoire","commode"],["étagère","bibliothèque"],["bureau","table de travail"],
+  ["tabouret","pouf"],["lampe","lustre"],["tapis","moquette"],["rideau","volet"],
+
+  // Chiffres et mathématiques simples
+  ["addition","soustraction"],["multiplication","division"],["carré","rectangle"],
+  ["cercle","triangle"],["moitié","quart"],["pair","impair"],["chiffre","nombre"],
+
+  // Céréales et petits-déjeuners
+  ["céréales","granola"],["pain grillé","tartine"],["beurre","confiture"],
+  ["lait","jus de fruit"],["miel","sirop d'érable"],["oeuf","omelette"],
+
+  // Activités artistiques
+  ["peinture","dessin"],["sculpture","modelage"],["origami","découpage"],
+  ["photographie","illustration"],["broderie","tricot"],
+
+  // Mots opposés simples
+  ["jour","nuit"],["été","hiver"],["montée","descente"],["entrée","sortie"],
+  ["début","fin"],["question","réponse"],["problème","solution"],["ami","ennemi"],
+
+  // Lieux de vacances
+  ["plage","montagne"],["camping","hôtel"],["village","ville"],["campagne","mer"],
+  ["piscine","lac"],["parc d'attractions","zoo"],
+
+  // ── Vocabulaire enfant 6 ans ────────────────────────────────────
+
+  // Animaux familiers & de la ferme
+  ["chaton","chiot"],["poussin","caneton"],["veau","agneau"],["cochon","mouton"],
+  ["âne","cheval"],["coq","poule"],["lapin","cochon d'Inde"],["hamster","gerbille"],
+  ["canari","perruche"],["poisson rouge","tortue"],["chèvre","brebis"],["dindon","oie"],
+  ["vache","chèvre"],["chien","chat"],["poney","âne"],["brebis","agneau"],
+
+  // Animaux de la forêt & du jardin
+  ["hérisson","taupe"],["écureuil","lapin"],["renard","blaireau"],["lièvre","lapin"],
+  ["ver de terre","limace"],["coccinelle","papillon"],["abeille","bourdon"],
+  ["escargot","limace"],["moineau","rouge-gorge"],["merle","pie"],["hibou","chouette"],
+  ["grenouille","têtard"],["libellule","demoiselle"],["chenille","papillon"],
+
+  // Jouets & jeux
+  ["poupée","nounours"],["ballon","balle"],["vélo","trottinette"],["toboggan","balançoire"],
+  ["bac à sable","piscine gonflable"],["kapla","légo"],["puzzle","dominos"],
+  ["dés","cartes"],["marelle","corde à sauter"],["cerf-volant","frisbee"],
+  ["yoyo","diabolo"],["dinette","déguisement"],["avion","drone"],
+  ["figurine","marionnette"],["château de sable","bonhomme de neige"],
+  ["saute-mouton","chat perché"],["cache-cache","loup"],["1,2,3 soleil","balle aux prisonniers"],
+
+  // École maternelle & primaire
+  ["maîtresse","directeur"],["cartable","sac à dos"],["trousse","étui à crayons"],
+  ["crayon","feutre"],["colle","ciseaux"],["peinture","craie"],["ardoise","cahier"],
+  ["règle","gomme"],["taille-crayon","stylo"],["classeur","cahier"],
+  ["récréation","déjeuner"],["sonnerie","cloche"],["rang","file"],["tableau","écran"],
+  ["lecture","écriture"],["calcul","dessin"],["comptine","chanson"],["histoire","conte"],
+  ["bibliothèque","médiathèque"],["cour de récré","gymnase"],
+
+  // Corps humain (niveau enfant)
+  ["tête","pied"],["main","pied"],["bras","jambe"],["doigt","orteil"],
+  ["oeil","oreille"],["nez","bouche"],["dent","langue"],["cheveu","ongle"],
+  ["ventre","dos"],["genou","coude"],["épaule","hanche"],["talon","cheville"],
+  ["front","menton"],["joue","lèvre"],["pouce","index"],["poignet","cheville"],
+
+  // Vêtements enfant
+  ["T-shirt","pull"],["pantalon","short"],["robe","jupe"],["chaussette","collant"],
+  ["basket","sandale"],["botte","chausson"],["manteau","veste"],["écharpe","bonnet"],
+  ["gant","moufle"],["pyjama","survêtement"],["chapeau","casquette"],["tablier","blouse"],
+  ["maillot de bain","combinaison"],["ceinture","bretelles"],["salopette","combinaison"],
+
+  // Nourriture enfant
+  ["bonbon","sucette"],["chewing-gum","dragée"],["chips","pop-corn"],
+  ["yaourt","fromage blanc"],["compote","purée"],["soupe","bouillon"],
+  ["tartine","toast"],["céréales","muesli"],["crêpe","pancake"],["gaufre","beignet"],
+  ["pomme","poire"],["fraise","cerise"],["raisin","prune"],["abricot","pêche"],
+  ["banane","kiwi"],["orange","mandarine"],["melon","pastèque"],["ananas","mangue"],
+  ["carotte","concombre"],["petit pois","haricot vert"],["maïs","brocoli"],
+  ["pâtes","riz"],["semoule","boulgour"],["pain","baguette"],["biscuit","gâteau"],
+  ["chocolat","bonbon"],["tarte","cake"],["madeleine","financier"],
+  ["lait","jus de fruit"],["eau","limonade"],["chocolat chaud","grenadine"],
+
+  // Couleurs & formes
+  ["rouge","rose"],["bleu","violet"],["jaune","orange"],["vert","turquoise"],
+  ["noir","gris"],["blanc","beige"],["marron","ocre"],["doré","argenté"],
+  ["rond","ovale"],["carré","rectangle"],["triangle","losange"],["étoile","coeur"],
+  ["cube","sphère"],["cylindre","cône"],["spirale","zigzag"],
+
+  // Chiffres & lettres
+  ["un","deux"],["trois","quatre"],["cinq","six"],["sept","huit"],
+  ["neuf","dix"],["onze","douze"],["vingt","trente"],["cent","mille"],
+  ["voyelle","consonne"],["majuscule","minuscule"],["mot","phrase"],["lettre","chiffre"],
+
+  // Maison & famille
+  ["maman","papa"],["frère","soeur"],["mamie","papi"],["tonton","tatie"],
+  ["bébé","enfant"],["cousin","cousine"],["parrain","marraine"],["voisin","ami"],
+  ["salon","chambre"],["cuisine","salle à manger"],["salle de bain","toilettes"],
+  ["grenier","cave"],["garage","jardin"],["porte","fenêtre"],["escalier","ascenseur"],
+  ["canapé","fauteuil"],["lit","berceau"],["table","bureau"],["chaise","tabouret"],
+  ["armoire","commode"],["étagère","bibliothèque"],["miroir","tableau"],["lampe","bougie"],
+  ["réfrigérateur","congélateur"],["four","micro-ondes"],["lavabo","baignoire"],
+  ["robinet","douche"],["tapis","parquet"],["rideau","volet"],["balcon","terrasse"],
+
+  // Émotions & caractère
+  ["content","triste"],["joyeux","malheureux"],["en colère","calme"],["peur","courage"],
+  ["timide","bavard"],["gentil","méchant"],["sage","turbulent"],["fatigué","reposé"],
+  ["surpris","habitué"],["jaloux","généreux"],["curieux","indifférent"],["fier","honteux"],
+  ["ennuyé","amusé"],["amoureux","fâché"],["inquiet","rassuré"],["déçu","soulagé"],
+
+  // Nature & saisons
+  ["printemps","automne"],["été","hiver"],["soleil","pluie"],["nuage","ciel bleu"],
+  ["arc-en-ciel","éclair"],["neige","grêle"],["vent","brise"],["brouillard","givre"],
+  ["feuille","fleur"],["graine","fruit"],["racine","branche"],["tronc","écorce"],
+  ["champignon","mousse"],["gazon","herbe"],["pissenlit","coquelicot"],["marguerite","tulipe"],
+  ["rose","tournesol"],["lilas","lavande"],["gland","noisette"],["pomme de pin","châtaigne"],
+
+  // Temps & rythme de vie
+  ["matin","soir"],["midi","minuit"],["hier","demain"],["aujourd'hui","demain"],
+  ["lundi","mardi"],["mercredi","jeudi"],["vendredi","samedi"],["semaine","week-end"],
+  ["janvier","juillet"],["heure","minute"],["réveil","dodo"],["goûter","petit-déjeuner"],
+  ["bain","douche"],["sieste","nuit"],["anniversaire","Noël"],["vacances","rentrée"],
+
+  // Contes & univers imaginaire
+  ["fée","sorcière"],["prince","princesse"],["dragon","licorne"],["géant","nain"],
+  ["château","chaumière"],["forêt enchantée","mer magique"],["baguette magique","potion"],
+  ["coffre au trésor","carte au trésor"],["pirate","chevalier"],["robot","alien"],
+  ["super-héros","vilain"],["cape","masque"],["épée","bouclier"],["arc","flèche"],
+  ["loup-garou","vampire"],["fantôme","monstre"],["fée clochette","Cendrillon"],
+  ["Blanche-Neige","Belle au bois dormant"],
+  ["Pinocchio","Gepetto"],["Dumbo","Bambi"],
+
+  // Musique & sons
+  ["tambour","tambourin"],["flûte","pipeau"],["maracas","triangle"],
+  ["cloche","sonnette"],["sifflet","trompette"],["guitare","violon"],
+  ["chanson","comptine"],["mélodie","rythme"],["silence","bruit"],["doux","fort"],
+  ["aigu","grave"],["lent","rapide"],["film","bande-annonce"],
+
+  // Sport & plein air enfant
+  ["vélo","moto"],["skate","trottinette"],["ballon de foot","ballon de basket"],
+  ["corde à sauter","élastique"],["natation","patinage"],["judo","karaté"],
+  ["tennis","ping-pong"],["badminton","volant"],["toboggan","trampoline"],
+  ["balançoire","tourniquet"],["course","saut"],["ramper","rouler"],["lancer","attraper"],
+  ["grimper","glisser"],["sauter","courir"],["marcher","galoper"],
+
+  // Instruments & outils simples
+  ["marteau","clou"],["tournevis","vis"],["pinceau","brosse"],["seau","arrosoir"],
+  ["pelle","râteau"],["louche","spatule"],["fouet","rouleau à pâtisserie"],
+  ["ciseau","aiguille"],["fil","bouton"],["ruban","noeud"],["colle","scotch"],
+  ["loupe","jumelles"],["règle","équerre"],["balance","minuteur"],
+
+  // Transports enfant
+  ["vélo","trottinette"],["voiture","train"],["bus scolaire","minibus"],
+  ["train","tramway"],["bateau","barque"],["avion","hélicoptère"],
+  ["camion de pompier","ambulance"],["tracteur","pelleteuse"],["moto","scooter"],
+  ["fusée","navette spatiale"],["sous-marin","plongeur"],["radeau","canoë"],
+
+  // Eau & bain
+  ["savon","shampooing"],["brosse à dents","dentifrice"],["serviette","gant de toilette"],
+  ["baignoire","pataugeoire"],["mousse","bulle"],
+  ["éponge","lavette"],["peignoir","pyjama"],
+
+  // Alimentation (textures & goûts)
+  ["sucré","salé"],["chaud","froid"],["mou","dur"],["croquant","fondant"],
+  ["acide","amer"],["épicé","doux"],["liquide","solide"],["chaud","tiède"],
+
+  // Lecture & histoires
+  ["album","livre de poche"],["image","texte"],["héros","méchant"],["début","fin"],
+  ["page","chapitre"],["titre","auteur"],["bibliothèque","librairie"],["conte","fable"],
+  ["poème","devinette"],["blague","histoire drôle"],["BD","manga"],["illustrateur","écrivain"],
+
+  // Fêtes & célébrations
+  ["Noël","Nouvel An"],["Halloween","carnaval"],["Pâques","fête des mères"],
+  ["anniversaire","baptême"],["mariage","communion"],["bal masqué","défilé"],
+  ["gâteau d'anniversaire","bûche de Noël"],["guirlande","sapin"],["ballon","banderole"],
+  ["bougie","feu d'artifice"],["déguisement","costume"],["cadeau","surprise"],
+
+  // Animaux marins & aquatiques
+  ["poisson","crabe"],["dauphin","otarie"],["phoque","morse"],["baleine","éléphant"],
+  ["méduse","étoile de mer"],["hippocampe","pieuvre"],["requin","raie"],
+  ["grenouille","triton"],["canard","cygne"],["loutre","castor"],["héron","martin-pêcheur"],
+
+  // Légumes du jardin
+  ["tomate","poivron"],["salade","épinard"],["radis","navet"],["poireau","oignon"],
+  ["ail","échalote"],["haricot","petits pois"],["courgette","concombre"],
+  ["citrouille","potiron"],["artichaut","asperge"],["betterave","céleri"],
+
+  // Fruits exotiques & locaux
+  ["cerise","groseille"],["mûre","myrtille"],["framboise","cassis"],["figue","datte"],
+  ["litchi","grenade"],["papaye","goyave"],["coco","noix de cajou"],["olive","câpre"],
+
+  // Animaux de nuit
+  ["hibou","chauve-souris"],["hérisson","renard"],["loup","coyote"],["chouette","grand-duc"],
+  ["luciole","ver luisant"],["grillon","crapaud"],["raton laveur","castor"],
+
+  // Magie & science enfant
+  ["expérience","résultat"],["loupe","microscope"],["aimant","boussole"],
+  ["cristal","sable coloré"],
+  ["bulle","balle"],["magicien","mentaliste"],
+
+  // Animaux préhistoriques
+  ["dinosaure","mammouth"],["T-Rex","tricératops"],["ptérodactyle","diplodocus"],
+
+  // Mots du quotidien enfant
+  ["doudou","couverture"],["tétine","biberon"],["poussette","porte-bébé"],
+  ["hochet","mobile"],["parc","tapis d'éveil"],["veilleuse","mobile"],
+  ["siège auto","harnais"],["casque","genouillère"],
+  ["sac de couchage","tente"],["lampe de poche","frontale"],
+];
+
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+const MAX_PLAYERS = 20;
+
+let state = {
+  players: [],           // [{name, role, word, eliminated, score}]
+  playerCount: 3,        // number chosen in setup screen
+  citizenWord: '',
+  undercoverWord: '',
+  undercoverCount: 1,
+  hasMrWhite: false,
+  mrwhiteCount: 0,
+  hasOracle: false,
+  wordsConfirmed: false,
+  round: 1,
+  revealIndex: 0,
+  wordRevealed: false,
+  votes: {},             // {playerName: votes}
+  currentVoterIdx: 0,
+  selectedVote: null,
+  gamePhase: 'setup',    // setup | reveal | play | vote | elimination | gameover
+  wordPairIndex: -1,
+};
+
+// Persistent scores
+function getScores() {
+  try { return JSON.parse(localStorage.getItem('undercover_scores') || '{}'); }
+  catch { return {}; }
+}
+function addScore(name) {
+  const s = getScores();
+  s[name] = (s[name] || 0) + 1;
+  localStorage.setItem('undercover_scores', JSON.stringify(s));
+}
+function clearScores() {
+  if (confirm('Effacer tous les scores ?')) {
+    localStorage.removeItem('undercover_scores');
+    renderScores();
+    notify('Scores effacés');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'screen-scores') renderScores();
+}
+
+function notify(msg, duration = 2500) {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════════════════
+function defaultCounts() {
+  const n = state.playerCount;
+  // Default UC: 1 for 3-6, 2 for 7-10, 3 for 11+
+  const defUC = n >= 11 ? 3 : n >= 7 ? 2 : 1;
+  // Default MW: 0 for 3-4, 1 for 5-8, 2 for 9+
+  const defMW = n >= 9 ? 2 : n >= 5 ? 1 : 0;
+  return { defUC, defMW };
+}
+
+function changePlayerCount(delta) {
+  const newCount = Math.max(3, Math.min(MAX_PLAYERS, state.playerCount + delta));
+  state.playerCount = newCount;
+  document.getElementById('player-count-display').textContent = newCount;
+  // Update minus/plus button styles
+  const minusBtn = document.getElementById('players-minus-btn');
+  const plusBtn = document.getElementById('players-plus-btn');
+  minusBtn.disabled = newCount <= 3;
+  plusBtn.disabled = newCount >= MAX_PLAYERS;
+  minusBtn.style.background = newCount <= 3 ? 'var(--surface)' : 'var(--accent)';
+  minusBtn.style.color = newCount <= 3 ? 'var(--muted)' : '#000';
+  plusBtn.style.background = newCount >= MAX_PLAYERS ? 'var(--surface)' : 'var(--accent)';
+  plusBtn.style.color = newCount >= MAX_PLAYERS ? 'var(--muted)' : '#000';
+  // Update label
+  const lbl = document.getElementById('max-players-label');
+  if (lbl) lbl.textContent = MAX_PLAYERS;
+  // Recalculate defaults and reset role counts
+  const { defUC, defMW } = defaultCounts();
+  const ucEl = document.getElementById('uc-val');
+  const mwEl = document.getElementById('mw-val');
+  if (ucEl) ucEl.textContent = defUC;
+  if (mwEl) mwEl.textContent = defMW;
+  const oracleToggle = document.getElementById('toggle-oracle');
+  if (oracleToggle && newCount < 10) oracleToggle.checked = false;
+  updateCountButtons();
+}
+
+function updateCountButtons() {
+  const n = state.playerCount;
+  const uc = parseInt(document.getElementById('uc-val').textContent) || 1;
+  const mw = parseInt(document.getElementById('mw-val').textContent) || 0;
+  const oracle = parseInt(document.getElementById('oracle-val')?.textContent) || 0;
+
+  // UC: min 1, max such that uc + mw < n-1
+  // Citizens must be strictly majority: impostors < n/2
+  const maxImpostors = Math.floor((n - 1) / 2);
+  const ucMax = Math.max(1, maxImpostors - mw);
+  const ucMinus = document.getElementById('uc-minus');
+  const ucPlus = document.getElementById('uc-plus');
+  ucMinus.disabled = uc <= 1;
+  ucPlus.disabled = uc >= ucMax;
+  ucMinus.style.background = uc <= 1 ? 'var(--surface)' : 'var(--accent)';
+  ucMinus.style.color = uc <= 1 ? 'var(--muted)' : '#000';
+  ucPlus.style.background = uc >= ucMax ? 'var(--surface)' : 'var(--accent)';
+  ucPlus.style.color = uc >= ucMax ? 'var(--muted)' : '#000';
+  document.getElementById('uc-plural').textContent = uc > 1 ? 's' : '';
+  // MW: min 0, max 3 and total impostors <= floor((n-1)/2)
+  const mwMax = Math.min(3, Math.max(0, maxImpostors - uc));
+  const mwMinus = document.getElementById('mw-minus');
+  const mwPlus = document.getElementById('mw-plus');
+  mwMinus.disabled = mw <= 0;
+  mwPlus.disabled = mw >= mwMax;
+  mwMinus.style.background = mw <= 0 ? 'var(--surface)' : 'var(--accent)';
+  mwMinus.style.color = mw <= 0 ? 'var(--muted)' : '#000';
+  mwPlus.style.background = mw >= mwMax ? 'var(--surface)' : 'var(--accent)';
+  mwPlus.style.color = mw >= mwMax ? 'var(--muted)' : '#000';
+  document.getElementById('mw-plural').textContent = mw > 1 ? 's' : '';
+  document.getElementById('mw-plural2').textContent = mw > 1 ? 's' : '';
+
+  // Oracle toggle: visible seulement à partir de 10 joueurs ET si au moins 1 homme invisible
+  const oracleRow = document.getElementById('oracle-row');
+  if (oracleRow) {
+    const oracleVisible = n >= 10 && mw >= 1;
+    oracleRow.style.display = oracleVisible ? '' : 'none';
+    if (!oracleVisible) {
+      const tog = document.getElementById('toggle-oracle');
+      if (tog) tog.checked = false;
+    }
+    // Style the slider with oracle color when checked
+    const tog = document.getElementById('toggle-oracle');
+    if (tog) {
+      const slider = tog.nextElementSibling;
+      if (slider) slider.style.background = tog.checked ? 'var(--oracle)' : '';
+    }
+  }
+
+  // Global max label
+  const lbl = document.getElementById('max-impostors-label');
+  if (lbl) lbl.textContent = maxImpostors + ' imposteur' + (maxImpostors > 1 ? 's' : '') + ' au maximum';
+}
+
+function changeCount(type, delta) {
+  const valEl = document.getElementById(type + '-val');
+  let v = parseInt(valEl.textContent) + delta;
+  // Oracle: clamp 0-1
+  if (type === 'oracle') v = Math.max(0, Math.min(1, v));
+  valEl.textContent = v;
+  updateCountButtons();
+}
+
+function updateRoleToggles() {
+  updateCountButtons();
+}
+
+function toggleWordMode() {
+  if (state.wordsConfirmed) return; // cadre déjà masqué, ne rien faire
+  const random = document.getElementById('toggle-random-words').checked;
+  document.getElementById('custom-words-section').style.display = random ? 'none' : '';
+  document.getElementById('random-words-info').style.display = random ? '' : 'none';
+  state.wordsConfirmed = false;
+}
+
+function confirmCustomWords() {
+  const cw = document.getElementById('citizen-word').value.trim();
+  const uw = document.getElementById('undercover-word').value.trim();
+  if (!cw || !uw) { notify('Remplissez les deux mots !'); return; }
+  state.citizenWord = cw;
+  state.undercoverWord = uw;
+  state.wordsConfirmed = true;
+  // Masquer le cadre entier — toggle inclus, plus moyen de retrouver les mots
+  document.getElementById('words-card').style.display = 'none';
+  notify('Mots enregistrés !');
+}
+
+function resetWordsConfirm() {
+  state.wordsConfirmed = false;
+}
+
+// ─── (player list functions removed — names entered during reveal phase) ───
+
+// ═══════════════════════════════════════════════════════════════
+//  START GAME
+// ═══════════════════════════════════════════════════════════════
+function startGame() {
+  const n = state.playerCount;
+  if (n < 3) { notify('Il faut au moins 3 joueurs !'); return; }
+
+  const ucCount = parseInt(document.getElementById('uc-val').textContent) || 1;
+  const mwCount = parseInt(document.getElementById('mw-val').textContent) || 0;
+  const hasOracle = n >= 10 && (document.getElementById('toggle-oracle')?.checked || false);
+  const hasMrWhite = mwCount > 0;
+  if (ucCount < 1) { notify('Il faut au moins 1 agent secret !'); return; }
+
+  state.undercoverCount = ucCount;
+  state.mrwhiteCount = mwCount;
+  state.hasMrWhite = hasMrWhite;
+  state.hasOracle = hasOracle;
+
+  // Check enough citizens remain
+  const impostors = ucCount + mwCount;
+  if (impostors > Math.floor((n - 1) / 2)) { notify('Les citoyens doivent être majoritaires !'); return; }
+
+  // Pick words
+  const useRandom = document.getElementById('toggle-random-words').checked;
+  if (useRandom) {
+    // Load used indices and blacklist from localStorage
+    let usedIndices = [];
+    let blacklist = [];
+    try { usedIndices = JSON.parse(localStorage.getItem('undercover_used_pairs') || '[]'); } catch {}
+    try { blacklist = JSON.parse(localStorage.getItem('undercover_blacklist') || '[]'); } catch {}
+    // Pairs available = not blacklisted
+    const allValid = WORD_PAIRS.map((_, i) => i).filter(i => !blacklist.includes(i));
+    // If all valid pairs have been used, reset used list
+    const unusedValid = allValid.filter(i => !usedIndices.includes(i));
+    if (unusedValid.length === 0) {
+      usedIndices = [];
+      localStorage.setItem('undercover_used_pairs', JSON.stringify(usedIndices));
+      notify('Toutes les paires ont été jouées — on recommence !');
+    }
+    // Pick a random unused (non-blacklisted) index
+    const available = allValid.filter(i => !usedIndices.includes(i));
+    const idx = available[Math.floor(Math.random() * available.length)];
+    usedIndices.push(idx);
+    localStorage.setItem('undercover_used_pairs', JSON.stringify(usedIndices));
+    updatePairsCount();
+    // Swap occasionally for variety
+    const pair = Math.random() < 0.5 ? WORD_PAIRS[idx] : [WORD_PAIRS[idx][1], WORD_PAIRS[idx][0]];
+    state.citizenWord = pair[0];
+    state.undercoverWord = pair[1];
+    state.wordPairIndex = idx;
+  } else {
+    if (!state.wordsConfirmed) { notify('Validez d\'abord les mots !'); return; }
+  }
+
+  // Build role assignments (shuffled) — names will be filled during reveal phase
+  const shuffledSlots = shuffle([...Array(n).keys()]);
+  const roleAssignment = [];
+  for (let i = 0; i < n; i++) roleAssignment.push('citizen');
+  for (let i = 0; i < ucCount; i++) roleAssignment[i] = 'undercover';
+  for (let i = 0; i < mwCount; i++) roleAssignment[ucCount + i] = 'mrwhite';
+  if (hasOracle) roleAssignment[ucCount + mwCount] = 'oracle';
+
+  // Pre-create player slots with roles but no names yet
+  state.players = Array.from({ length: n }, (_, i) => {
+    const role = roleAssignment[shuffledSlots.indexOf(i)];
+    const word = role === 'citizen' ? state.citizenWord
+               : role === 'undercover' ? state.undercoverWord
+               : role === 'oracle' ? state.citizenWord
+               : '???';
+    return { name: '', role, word, eliminated: false, score: 0 };
+  });
+
+  state.round = 1;
+  state.revealIndex = 0;
+  state.wordRevealed = false;
+  state.gamePhase = 'reveal';
+
+  renderRevealScreen();
+  showScreen('screen-reveal');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REVEAL SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderRevealScreen() {
+  const i = state.revealIndex;
+  const total = state.players.length;
+
+  document.getElementById('reveal-idx').textContent = i + 1;
+  document.getElementById('reveal-total').textContent = total;
+  document.getElementById('reveal-player-num').textContent = i + 1;
+
+  // Show name-entry phase, hide role-reveal phase
+  document.getElementById('reveal-name-section').style.display = '';
+  document.getElementById('reveal-role-section').style.display = 'none';
+
+  // Clear the name input
+  const nameInput = document.getElementById('reveal-name-input');
+  nameInput.value = '';
+  setTimeout(() => nameInput.focus(), 100);
+
+  // Reset role reveal state
+  document.getElementById('word-hidden').style.display = '';
+  document.getElementById('word-revealed').style.display = 'none';
+  document.getElementById('reveal-next-btn').style.display = 'none';
+  const box = document.getElementById('word-box');
+  if (box) box.className = 'word-box';
+  state.wordRevealed = false;
+}
+
+function confirmPlayerName() {
+  const nameInput = document.getElementById('reveal-name-input');
+  const name = nameInput.value.trim();
+  if (!name) { notify('Entre ton prénom !'); return; }
+
+  // Check for duplicate names among already-named players
+  const alreadyUsed = state.players.slice(0, state.revealIndex).some(
+    p => p.name.toLowerCase() === name.toLowerCase()
+  );
+  if (alreadyUsed) { notify('Ce prénom est déjà pris !'); return; }
+
+  // Assign name
+  state.players[state.revealIndex].name = name;
+
+  // Show role reveal phase
+  document.getElementById('reveal-name-section').style.display = 'none';
+  document.getElementById('reveal-role-section').style.display = '';
+
+  const i = state.revealIndex;
+  const total = state.players.length;
+  document.getElementById('reveal-next-btn').textContent =
+    i < total - 1 ? 'Clique, puis passe →' : 'Commencer la partie →';
+}
+
+function revealWord() {
+  if (state.wordRevealed) return;
+  const player = state.players[state.revealIndex];
+  state.wordRevealed = true;
+
+  document.getElementById('word-hidden').style.display = 'none';
+  document.getElementById('word-revealed').style.display = '';
+
+  const badgeContainer = document.getElementById('role-badge-container');
+
+  if (player.role === 'oracle') {
+    const words = Math.random() < 0.5
+      ? [state.citizenWord, state.undercoverWord]
+      : [state.undercoverWord, state.citizenWord];
+    document.getElementById('secret-word-text').innerHTML =
+      `<span style="color:var(--oracle)">${words[0]}</span> <span style="color:var(--muted);font-size:1rem">/</span> <span style="color:var(--oracle)">${words[1]}</span>`;
+    badgeContainer.innerHTML = `<span class="role-badge badge-oracle">🔮 Oracle — tu connais les deux mots, mais tu ignores lequel appartient aux citoyens.</span>`;
+  } else if (player.role === 'mrwhite') {
+    document.getElementById('secret-word-text').textContent = '— Aucun mot —';
+    badgeContainer.innerHTML = `<span class="role-badge badge-mrwhite">👁️ Homme invisible — tu n'as aucun mot !</span>`;
+  } else {
+    document.getElementById('secret-word-text').textContent = player.word;
+    badgeContainer.innerHTML = '';
+  }
+
+  const box = document.getElementById('word-box');
+  box.className = 'word-box revealed';
+
+  document.getElementById('reveal-next-btn').style.display = '';
+}
+
+function nextReveal() {
+  state.revealIndex++;
+  if (state.revealIndex >= state.players.length) {
+    renderPlayScreen();
+    showScreen('screen-play');
+  } else {
+    renderRevealScreen();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PLAY SCREEN
+// ═══════════════════════════════════════════════════════════════
+function alivePlayers() {
+  return state.players.filter(p => !p.eliminated);
+}
+
+function getVoteOrder(alivePlayers) {
+  // Build a circular permutation of alive players in registration order (player 1, 2, ...).
+  // For round 1: choose a shift so that mrwhite is NOT first.
+  // For subsequent rounds: random shift.
+  const n = alivePlayers.length;
+  if (n === 0) return [];
+
+  // alivePlayers are already in original registration order (state.players order, filtered)
+  const mrwhiteIdx = alivePlayers.findIndex(p => p.role === 'mrwhite');
+
+  let shift;
+  if (state.round === 1) {
+    // Must choose shift such that position 0 is not mrwhite.
+    // With shift k, first player is alivePlayers[k % n].
+    // So we need k % n !== mrwhiteIdx.
+    const validShifts = [];
+    for (let k = 0; k < n; k++) {
+      if (k !== mrwhiteIdx) validShifts.push(k);
+    }
+    // If no mrwhite (or mrwhite doesn't exist), any shift is valid
+    if (validShifts.length === 0 || mrwhiteIdx === -1) {
+      shift = Math.floor(Math.random() * n);
+    } else {
+      shift = validShifts[Math.floor(Math.random() * validShifts.length)];
+    }
+  } else {
+    shift = Math.floor(Math.random() * n);
+  }
+
+  // Apply circular shift
+  const order = [];
+  for (let i = 0; i < n; i++) {
+    order.push(alivePlayers[(shift + i) % n]);
+  }
+  return order;
+}
+
+function renderPlayScreen() {
+  document.getElementById('play-round').textContent = state.round;
+  const alive = alivePlayers();
+  document.getElementById('play-alive-count').textContent = alive.length;
+
+  const list = document.getElementById('turn-order-list');
+  list.innerHTML = '';
+  const order = getVoteOrder(alive);
+  order.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = p.name;
+    list.appendChild(li);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  VOTE SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderVoteScreen() {
+  const alive = alivePlayers();
+  state.votes = {};
+  alive.forEach(p => state.votes[p.name] = 0);
+
+  document.getElementById('vote-tally').style.display = 'none';
+  updateVoteUI();
+  renderVoteList();
+}
+
+function totalVotesCast() {
+  return Object.values(state.votes).reduce((a, b) => a + b, 0);
+}
+
+function updateVoteUI() {
+  const alive = alivePlayers();
+  const total = totalVotesCast();
+  const max = alive.length;
+  document.getElementById('votes-cast').textContent = total;
+  document.getElementById('votes-needed').textContent = max;
+
+  const btn = document.getElementById('confirm-vote-btn');
+  if (total === max) {
+    btn.classList.add('btn-glow');
+  } else {
+    btn.classList.remove('btn-glow');
+  }
+}
+
+function renderVoteList() {
+  const alive = alivePlayers();
+  const max = alive.length;
+  const list = document.getElementById('vote-list');
+  list.innerHTML = '';
+  alive.forEach(p => {
+    const v = state.votes[p.name] || 0;
+    const total = totalVotesCast();
+    const li = document.createElement('li');
+    li.className = 'vote-item' + (v > 0 ? ' has-votes' : '');
+    li.innerHTML = `
+      <button class="vote-btn minus" onclick="changeVote('${p.name}', -1)" ${v <= 0 ? 'disabled' : ''}>−</button>
+      <span class="vote-name">${p.name}</span>
+      <span class="vote-count ${v > 0 ? 'has-votes' : ''}">${v}</span>
+      <button class="vote-btn plus" onclick="changeVote('${p.name}', +1)" ${total >= max ? 'disabled' : ''}>+</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function changeVote(name, delta) {
+  const alive = alivePlayers();
+  const max = alive.length;
+  const current = state.votes[name] || 0;
+  const total = totalVotesCast();
+
+  if (delta > 0 && total >= max) return;
+  if (delta < 0 && current <= 0) return;
+
+  state.votes[name] = current + delta;
+  updateVoteUI();
+  renderVoteList();
+}
+
+function confirmVote() {
+  const total = totalVotesCast();
+  if (total === 0) { notify('Distribuez au moins un vote !'); return; }
+  showVoteTally();
+}
+
+function showVoteTally() {
+  const sorted = Object.entries(state.votes).sort((a, b) => b[1] - a[1]);
+  const tallyCont = document.getElementById('vote-tally-content');
+  tallyCont.innerHTML = sorted.map(([name, v]) =>
+    `<div class="stat-row"><span>${name}</span><span class="stat-val">${v} vote${v > 1 ? 's' : ''}</span></div>`
+  ).join('');
+  document.getElementById('vote-tally').style.display = '';
+
+  const maxVotes = sorted[0][1];
+  // Ignorer les joueurs à 0 vote pour l'égalité
+  const topVoters = sorted.filter(([, v]) => v === maxVotes && v > 0);
+
+  if (topVoters.length > 1) {
+    // Égalité — re-vote uniquement parmi les ex-aequo
+    notify('Égalité ! Revotez parmi les suspects.', 3000);
+    const tiedNames = topVoters.map(([n]) => n);
+    state.votes = {};
+    tiedNames.forEach(n => state.votes[n] = 0);
+
+    // Reconstruire la liste avec seulement les ex-aequo
+    // On simule un alivePlayers réduit pour le re-vote
+    state._tiedNames = tiedNames;
+
+    const list = document.getElementById('vote-list');
+    list.innerHTML = '';
+    const alive = alivePlayers();
+    tiedNames.forEach(name => {
+      const li = document.createElement('li');
+      li.className = 'vote-item';
+      li.innerHTML = `
+        <button class="vote-btn minus" onclick="changeTiedVote('${name}', -1)" disabled>−</button>
+        <span class="vote-name">${name}</span>
+        <span class="vote-count" id="tied-count-${name}">0</span>
+        <button class="vote-btn plus" onclick="changeTiedVote('${name}', +1)">+</button>
+      `;
+      list.appendChild(li);
+    });
+
+    document.getElementById('votes-cast').textContent = 0;
+    document.getElementById('votes-needed').textContent = alive.length;
+    document.getElementById('confirm-vote-btn').classList.remove('btn-glow');
+    document.getElementById('vote-tally').style.display = 'none';
+    return;
+  }
+
+  // Éliminer le joueur le plus voté
+  const eliminatedName = sorted[0][0];
+  eliminatePlayer(eliminatedName);
+}
+
+function changeTiedVote(name, delta) {
+  const alive = alivePlayers();
+  const max = alive.length;
+  const current = state.votes[name] || 0;
+  const total = Object.values(state.votes).reduce((a, b) => a + b, 0);
+
+  if (delta > 0 && total >= max) return;
+  if (delta < 0 && current <= 0) return;
+
+  state.votes[name] = current + delta;
+
+  // Mettre à jour l'affichage du re-vote
+  const tiedNames = state._tiedNames;
+  tiedNames.forEach(n => {
+    const el = document.getElementById('tied-count-' + n);
+    if (el) el.textContent = state.votes[n] || 0;
+  });
+
+  // Mettre à jour les boutons +/-
+  const newTotal = Object.values(state.votes).reduce((a, b) => a + b, 0);
+  document.getElementById('votes-cast').textContent = newTotal;
+
+  const btn = document.getElementById('confirm-vote-btn');
+  btn.classList.toggle('btn-glow', newTotal === max);
+
+  // Désactiver/activer les boutons
+  const list = document.getElementById('vote-list');
+  list.querySelectorAll('.vote-btn.plus').forEach(b => b.disabled = newTotal >= max);
+  list.querySelectorAll('.vote-btn.minus').forEach((b, i) => {
+    b.disabled = (state.votes[tiedNames[i]] || 0) <= 0;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ELIMINATION
+// ═══════════════════════════════════════════════════════════════
+function eliminatePlayer(name) {
+  const player = state.players.find(p => p.name === name);
+  player.eliminated = true;
+
+  document.getElementById('elim-name').textContent = player.name;
+  document.getElementById('mrwhite-guess-section').style.display = 'none';
+  document.getElementById('elim-continue-section').style.display = '';
+  document.getElementById('game-status-msg').style.display = 'none';
+  document.getElementById('elim-continue-btn').textContent = 'Continuer →';
+
+  let badgeClass = '', badgeText = '', icon = '';
+  if (player.role === 'citizen') {
+    badgeClass = 'badge-citizen'; badgeText = '👤 Citoyen'; icon = '😱';
+  } else if (player.role === 'undercover') {
+    badgeClass = 'badge-undercover'; badgeText = '🕵️ Agent secret'; icon = '🎉';
+  } else if (player.role === 'oracle') {
+    badgeClass = 'badge-oracle'; badgeText = '🔮 Oracle'; icon = '🔮';
+  } else {
+    badgeClass = 'badge-mrwhite'; badgeText = "👁️ Homme invisible"; icon = '🤫';
+  }
+
+  document.getElementById('elim-icon').textContent = '💀';
+  document.getElementById('elim-title').textContent = player.role === 'mrwhite' ? 'L\'homme invisible est éliminé !' : 'Éliminé·e !';
+  // On ne révèle le rôle que pour l'homme invisible — les autres restent mystérieux
+  if (player.role === 'mrwhite') {
+    document.getElementById('elim-role-badge').innerHTML = `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
+  } else {
+    document.getElementById('elim-role-badge').innerHTML = '';
+  }
+  document.getElementById('elim-word').textContent = '';
+
+  // Always hide oracle death notice initially
+  const oracleDeathNotice = document.getElementById('oracle-death-notice');
+  if (oracleDeathNotice) oracleDeathNotice.style.display = 'none';
+
+  if (player.role === 'mrwhite') {
+    // Oracle fate is decided AFTER the guess — don't eliminate yet
+    document.getElementById('mrwhite-guess-section').style.display = '';
+    document.getElementById('mrwhite-guess-input').value = '';
+    document.getElementById('elim-continue-section').style.display = 'none';
+    // Show oracle cannot help notice
+    const oracleNotice = document.getElementById('oracle-cannot-help');
+    if (oracleNotice) oracleNotice.style.display = state.hasOracle ? '' : 'none';
+  }
+
+  showScreen('screen-elimination');
+
+  // Check win condition after mr white is handled separately
+  if (player.role !== 'mrwhite') {
+    // If oracle was just voted out, that's fine - check win condition normally
+    checkWinCondition();
+  }
+}
+
+function judgeMrWhite() {
+  const soundexFR = s => {
+    s = s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    s = s.replace(/[^a-z]/g, '');
+    if (!s) return '';
+    // Groupes phonétiques français
+    s = s.replace(/ph/g, 'f');
+    s = s.replace(/eau|au/g, 'o');
+    s = s.replace(/ai|ei|ey|ay/g, 'e');
+    s = s.replace(/ou/g, 'u');
+    s = s.replace(/gu([ei])/g, 'k$1');
+    s = s.replace(/g([ei])/g, 'j$1');
+    s = s.replace(/qu/g, 'k');
+    s = s.replace(/ch/g, 'S');
+    s = s.replace(/[sz]/g, 's');
+    s = s.replace(/[ck]/g, 'k');
+    s = s.replace(/S/g, 's');
+    s = s.replace(/[dt]/g, 't');
+    s = s.replace(/[bp]/g, 'b');
+    s = s.replace(/[mn]/g, 'm');
+    // Supprimer les h muets, y→i
+    s = s.replace(/h/g, '');
+    s = s.replace(/y/g, 'i');
+    // Supprimer les e muets en fin de mot
+    s = s.replace(/e+$/, '');
+    // Dédoublonner les consonnes consécutives
+    s = s.replace(/(.)\1+/g, '$1');
+    return s;
+  };
+  const normalize = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+  const guessRaw = normalize(document.getElementById('mrwhite-guess-input').value);
+  const correctRaw = normalize(state.citizenWord);
+  const guess = soundexFR(guessRaw);
+  const correct = soundexFR(correctRaw);
+  const mrWhite = state.players.find(p => p.role === 'mrwhite');
+
+  if (guess === correct) {
+    // Homme invisible wins — Oracle wins too (stays alive / not eliminated)
+    const oracle = state.hasOracle ? state.players.find(p => p.role === 'oracle' && !p.eliminated) : null;
+
+    document.getElementById('mrwhite-guess-section').style.display = 'none';
+    document.getElementById('elim-continue-section').style.display = '';
+    document.getElementById('game-status-msg').style.display = '';
+
+    const oracleWinLine = oracle ? `<br><span style="color:var(--oracle);font-size:0.9rem">🔮 ${oracle.name} (Oracle) partage la victoire !</span>` : '';
+    document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">👁️</span><br>L'homme invisible a deviné "${state.citizenWord}" !<br><strong style="color:var(--mrwhite)">L'homme invisible gagne !</strong>${oracleWinLine}`;
+    document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
+    document.getElementById('elim-continue-btn').onclick = () => endGame('mrwhite');
+
+    addScore(mrWhite.name);
+    if (oracle) addScore(oracle.name);
+    // Oracle is NOT marked eliminated — it won, so it won't be crossed out in the recap
+
+  } else {
+    // Mauvaise réponse — Oracle is now eliminated too
+    notify("Mauvaise réponse !", 2500);
+
+    if (state.hasOracle) {
+      const oracle = state.players.find(p => p.role === 'oracle' && !p.eliminated);
+      if (oracle) {
+        oracle.eliminated = true;
+        const oracleDeathNotice = document.getElementById('oracle-death-notice');
+        if (oracleDeathNotice) {
+          document.getElementById('oracle-death-name').textContent = oracle.name + ',';
+          oracleDeathNotice.style.display = '';
+        }
+      }
+    }
+
+    document.getElementById('mrwhite-guess-section').style.display = 'none';
+    document.getElementById('elim-continue-section').style.display = '';
+    checkWinCondition(true);
+  }
+}
+
+function checkWinCondition(afterMrWhite = false) {
+  const alive = alivePlayers();
+  const aliveUndercover = alive.filter(p => p.role === 'undercover');
+  const aliveCitizens = alive.filter(p => p.role === 'citizen' || p.role === 'oracle');
+  const aliveMrWhite = alive.filter(p => p.role === 'mrwhite');
+  const aliveImpostors = aliveUndercover.length + aliveMrWhite.length;
+
+  // Citoyens gagnent : plus aucun imposteur en vie
+  if (aliveImpostors === 0) {
+    document.getElementById('game-status-msg').style.display = '';
+    document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">🏛️</span><br><strong style="color:var(--citizen)">Les Citoyens gagnent !</strong>`;
+    document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
+    document.getElementById('elim-continue-btn').onclick = () => endGame('citizens');
+    alive.filter(p => p.role === 'citizen').forEach(p => addScore(p.name));
+    return;
+  }
+
+  // Imposteurs gagnent : il ne reste plus qu'un seul citoyen
+  if (aliveCitizens.length <= 1) {
+    document.getElementById('game-status-msg').style.display = '';
+    document.getElementById('game-status-text').innerHTML = `<span style="font-size:1.5rem">🕵️</span><br><strong style="color:var(--undercover)">Les imposteurs gagnent !</strong>`;
+    document.getElementById('elim-continue-btn').textContent = 'Voir le résultat';
+    document.getElementById('elim-continue-btn').onclick = () => endGame('undercover');
+    aliveUndercover.forEach(p => addScore(p.name));
+    aliveMrWhite.forEach(p => addScore(p.name));
+    return;
+  }
+
+  // La partie continue
+  document.getElementById('elim-continue-btn').textContent = 'Continuer la partie →';
+  document.getElementById('elim-continue-btn').onclick = continueAfterElim;
+}
+
+function continueAfterElim() {
+  state.round++;
+  renderPlayScreen();
+  renderVoteScreen();
+  showScreen('screen-play');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GAME OVER
+// ═══════════════════════════════════════════════════════════════
+function endGame(winner) {
+  const icons = { citizens: '🏛️', undercover: '🕵️', mrwhite: '👁️' };
+  const titles = { citizens: 'Victoire des Citoyens !', undercover: 'Les Agents secrets gagnent !', mrwhite: "L'homme invisible l'emporte !" };
+  const subs = {
+    citizens: 'Tous les imposteurs ont été démasqués.',
+    undercover: 'Les agents secrets sont restés dans l\'ombre !',
+    mrwhite: "Il a découvert le mot des citoyens !",
+  };
+
+  document.getElementById('go-icon').textContent = icons[winner];
+  document.getElementById('go-title').textContent = titles[winner];
+
+  // If oracle co-wins with mrwhite, mention it in the subtitle
+  if (winner === 'mrwhite' && state.hasOracle) {
+    const oracle = state.players.find(p => p.role === 'oracle' && !p.eliminated);
+    if (oracle) {
+      document.getElementById('go-subtitle').textContent = `Il a découvert le mot des citoyens ! 🔮 ${oracle.name} (Oracle) partage la victoire.`;
+    } else {
+      document.getElementById('go-subtitle').textContent = subs[winner];
+    }
+  } else {
+    document.getElementById('go-subtitle').textContent = subs[winner];
+  }
+
+  // Final reveal
+  const revealList = document.getElementById('final-reveal-list');
+  revealList.innerHTML = '';
+
+  const oracleSurvived = state.hasOracle && state.players.some(p => p.role === 'oracle' && !p.eliminated);
+
+  state.players.forEach(p => {
+    let badgeClass = '', badgeText = '';
+    if (p.role === 'citizen') { badgeClass = 'badge-citizen'; badgeText = '👤 Citoyen'; }
+    else if (p.role === 'undercover') { badgeClass = 'badge-undercover'; badgeText = '🕵️ Agent secret'; }
+    else if (p.role === 'oracle') { badgeClass = 'badge-oracle'; badgeText = '🔮 Oracle'; }
+    else { badgeClass = 'badge-mrwhite'; badgeText = "👁️ Homme invisible"; }
+
+    let crossedOut;
+    if (winner === 'mrwhite') {
+      // Gagnants : homme invisible + oracle vivant. Tous les autres barrés.
+      if (p.role === 'mrwhite') crossedOut = false;
+      else if (p.role === 'oracle' && oracleSurvived) crossedOut = false;
+      else crossedOut = true;
+    } else if (winner === 'citizens') {
+      // Gagnants : citoyens vivants. Imposteurs et éliminés barrés.
+      crossedOut = p.role !== 'citizen' || p.eliminated;
+    } else {
+      // winner === 'undercover' : agents secrets + homme invisible vivants gagnent.
+      crossedOut = !((p.role === 'undercover' || p.role === 'mrwhite') && !p.eliminated);
+    }
+
+    const div = document.createElement('div');
+    div.className = 'stat-row';
+    div.style.cssText = 'position:relative;overflow:hidden;';
+    div.innerHTML = `
+      <div>
+        <div style="font-size:0.9rem">${p.name}</div>
+        <span class="role-badge ${badgeClass}" style="margin-top:4px;display:inline-block">${badgeText}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--muted)">${p.role === 'mrwhite' ? '—' : p.role === 'oracle' ? `${state.citizenWord} / ${state.undercoverWord}` : p.word}</div>
+      ${crossedOut ? `
+        <div style="
+          position:absolute;inset:0;
+          pointer-events:none;
+          display:flex;align-items:center;justify-content:center;
+        ">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none"
+               style="position:absolute;inset:0;width:100%;height:100%;opacity:0.35;">
+            <line x1="4" y1="4" x2="96" y2="96" stroke="#aaa" stroke-width="6" stroke-linecap="round"/>
+            <line x1="96" y1="4" x2="4" y2="96" stroke="#aaa" stroke-width="6" stroke-linecap="round"/>
+          </svg>
+        </div>` : ''}
+    `;
+    revealList.appendChild(div);
+  });
+
+  showScreen('screen-gameover');
+}
+
+function reportWordPair() {
+  const w1 = state.citizenWord || '?';
+  const w2 = state.undercoverWord || '?';
+  const subject = encodeURIComponent('undercover');
+  const body = encodeURIComponent(`La paire de mots ${w1}/${w2} pose problème.`);
+
+  // Si on est en phase de distribution des rôles, on blackliste et on remet à zéro
+  if (state.gamePhase === 'reveal') {
+    // Retirer l'index de la liste des paires utilisées (déjà marqué comme joué)
+    // et l'ajouter dans une liste permanente de paires blacklistées
+    const idx = state.wordPairIndex;
+    if (idx >= 0) {
+      let blacklist = [];
+      try { blacklist = JSON.parse(localStorage.getItem('undercover_blacklist') || '[]'); } catch {}
+      if (!blacklist.includes(idx)) blacklist.push(idx);
+      localStorage.setItem('undercover_blacklist', JSON.stringify(blacklist));
+      updatePairsCount();
+
+      // Aussi retirer cette paire des "used" pour ne pas biaiser le compteur
+      let usedIndices = [];
+      try { usedIndices = JSON.parse(localStorage.getItem('undercover_used_pairs') || '[]'); } catch {}
+      usedIndices = usedIndices.filter(i => i !== idx);
+      localStorage.setItem('undercover_used_pairs', JSON.stringify(usedIndices));
+    }
+
+    // Remettre la partie à zéro
+    state.gamePhase = 'setup';
+    state.players = [];
+    showScreen('screen-setup');
+    notify('Paire signalée — la partie a été annulée.');
+  }
+
+  window.location.href = `mailto:s32.dumortier@gmail.com?subject=${subject}&body=${body}`;
+}
+
+function rematch() {
+  // Keep same player count and settings — restart
+  state.players = [];
+  showScreen('screen-setup');
+  notify('Même équipe, nouvelle partie !');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCORES SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderScores() {
+  const scores = getScores();
+  const list = document.getElementById('scores-list');
+  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+  if (entries.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:var(--muted)">Aucun score enregistré.</p>';
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  list.innerHTML = entries.map(([name, pts], i) => `
+    <div class="score-item">
+      <div>
+        <span style="margin-right:8px">${medals[i] || ''}</span>
+        <span>${name}</span>
+      </div>
+      <span class="score-pts">${pts} victoire${pts > 1 ? 's' : ''}</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT & SCREEN OVERRIDE
+// ═══════════════════════════════════════════════════════════════
+
+// Override showScreen for vote to trigger render
+const _showScreen = showScreen;
+window.showScreen = function(id) {
+  _showScreen(id);
+  if (id === 'screen-vote') renderVoteScreen();
+  if (id === 'screen-setup') {
+    updatePairsCount();
+    // Init player count display
+    document.getElementById('player-count-display').textContent = state.playerCount;
+    changePlayerCount(0); // refresh button styles
+    const { defUC, defMW } = defaultCounts();
+    const ucEl = document.getElementById('uc-val');
+    const mwEl = document.getElementById('mw-val');
+    if (ucEl) ucEl.textContent = defUC;
+    if (mwEl) mwEl.textContent = defMW;
+    updateCountButtons();
+    // Show roles card always (since we always have >= 3)
+    const rc = document.getElementById('roles-card');
+    if (rc) rc.style.display = '';
+    // Restaurer le cadre Mots et son état
+    const wc = document.getElementById('words-card');
+    if (wc) wc.style.display = '';
+    state.wordsConfirmed = false;
+    toggleWordMode();
+  }
+};
+
+// Init word pairs count
+function enterFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+}
+
+function updatePairsCount() {
+  let usedIndices = [];
+  let blacklist = [];
+  try { usedIndices = JSON.parse(localStorage.getItem('undercover_used_pairs') || '[]'); } catch {}
+  try { blacklist = JSON.parse(localStorage.getItem('undercover_blacklist') || '[]'); } catch {}
+  const total = WORD_PAIRS.length;
+  const blacklisted = blacklist.length;
+  const used = usedIndices.filter(i => !blacklist.includes(i)).length;
+  const available = total - blacklisted - used;
+  const el = document.getElementById('pairs-count');
+  el.textContent = available;
+  // Tooltip détaillé
+  el.title = `${total} paires au total — ${blacklisted} signalée(s) — ${used} déjà jouée(s)`;
+}
+updatePairsCount();
+// Initialize player count display
+changePlayerCount(0);
+const { defUC: _defUC, defMW: _defMW } = defaultCounts();
+const _ucEl = document.getElementById('uc-val');
+const _mwEl = document.getElementById('mw-val');
+if (_ucEl) _ucEl.textContent = _defUC;
+if (_mwEl) _mwEl.textContent = _defMW;
+updateCountButtons();
+</script>
+</body>
+</html>
